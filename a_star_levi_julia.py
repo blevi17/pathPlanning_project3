@@ -10,48 +10,62 @@ from sympy import *
 ##################################### Functions #####################################
 # pos_act = [x, y, theta], act is which one of the five actions
 def action_m(pos_act, L_act, act):
-    x_act = pos_act[0]
-    y_act = pos_act[1]
-    th_act = pos_act[2]
-    # move forward
-    if act == 1:
+     x_act = pos_act[0]
+     y_act = pos_act[1]
+     th_act = pos_act[2]
+     # move forward
+     if act == 1:
          ang = th_act * pi / 180
          x_add = L_act * cos(ang)
          y_add = L_act * sin(ang)
          x_new = float(x_act + x_add)
          y_new = float(y_act + y_add)
          th_new = th_act
-    # move counter-clockwise 30 
-    elif act == 2:
+     # move counter-clockwise 30 
+     elif act == 2:
          ang = (th_act + 30) * pi / 180
          x_add = float(L_act * cos(ang))
          y_add = float(L_act * sin(ang))
          x_new = x_act + x_add
          y_new = y_act + y_add
          th_new = th_act + 30
-    # move counter-clockwise 60 
-    elif act == 3:
+     # move counter-clockwise 60 
+     elif act == 3:
          ang = (th_act + 60) * pi / 180
          x_add = float(L_act * cos(ang))
          y_add = float(L_act * sin(ang))
          x_new = x_act + x_add
          y_new = y_act + y_add
          th_new = th_act + 60
-    # move clockwise 30 
-    elif act == 4:
+     # move clockwise 30 
+     elif act == 4:
          ang = (th_act - 30) * pi / 180
          x_add = float(L_act * cos(ang))
          y_add = float(L_act * sin(ang))
          x_new = x_act + x_add
          y_new = y_act + y_add
          th_new = th_act - 30
-    # move clockwise 60 
-    else:
+     # move clockwise 60 
+     else:
          ang = (th_act - 60) * pi / 180
          x_add = float(L_act * cos(ang))
          y_add = float(L_act * sin(ang))
          x_new = x_act + x_add
          y_new = y_act + y_add
          th_new = th_act - 60
+     
+     new_no = [x_new, y_new, th_new]
+
+     return new_no 
+
+     
+# This function converts the x, y, and theta list into the format needed for checking the tree (instructions: page 14, Second method) 
+def mat_expl(node_exp):
+    x_exp = round(2 * node_exp[0])
+    y_exp = round(2 * node_exp[1])
+    list_exp = [x_exp, y_exp, node_exp[2]]
+
+    return list_exp
          
-     ############################################ Main code ###############################################
+         
+############################################ Main code ###############################################

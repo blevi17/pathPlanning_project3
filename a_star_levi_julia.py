@@ -89,6 +89,9 @@ el1 = [0, 0, 0, node_i]
 # Starting the search
 res_g = 0  # becomes 1 or something else when we reach the goal
 id = el1[1]
+mat_exp_ol = np.zeros((1200, 400, 361))  # empty matrix to record where we have explored in the open list
+mat_exp_cl = np.zeros((1200, 400, 361))  # empty matrix to record where we have explored in the closed list
+# may want to move mat_exp earlier as we can designate obstacle space as 0
 while open_l.empty() != uu and res_g == 0:
      # pull out a node and add it to the closed list
      x = open_l.get()
@@ -98,7 +101,7 @@ while open_l.empty() != uu and res_g == 0:
      cur_ind = x[1]
      cur_par = x[2]
      cur_pos = x[4]
-
+    
      # check if we have reached the goal
      if cur_pos == node_g:  # Need to add the goal node input
           # run the backtrack function
@@ -108,15 +111,17 @@ while open_l.empty() != uu and res_g == 0:
      # perform all possible movements
      else:
           for i in range(0, 5):
-               mat_exp = np.zeros(1200, 400)
                new_pos = action_m(cur_pos, L, i)  # L is the user input for the step size of the robot
                # Check if the new location is in the closed list or obstacle space
-               #check_cl = p2_repeat_cl(q2, new_l)
+               i_e, j_e, th_e = mat_expl(new_pos)
+               check_cl = mat_exp_cl[i_e][j_e][th_e]
+               check_ol = mat_exp_ol[i_e][j_e][th_e]
                #check_ob = p2_coll(new_l)
                # need to add lxu = cost2come + cost2go
                if check_cl == 0 and check_ob == 1:
-                    check_ol = p2_repeat_cl(open_l, new_pos)
+                    mat_exp_cl[i_e][j_e][th_e] = 1  # now we have explored this in the closed list
                     if check_ol == 0:
+                        mat_exp_ol[i_e][j_e][th_e] = 1
                         id = id + 1
                         # lxu is cost to come plus cost to go
                         new_node = [cur_cost + lxu, id, cur_ind, new_pos]

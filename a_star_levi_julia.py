@@ -91,6 +91,7 @@ res_g = 0  # becomes 1 or something else when we reach the goal
 id = el1[1]
 mat_exp_ol = np.zeros((1200, 400, 361))  # empty matrix to record where we have explored in the open list
 mat_exp_cl = np.zeros((1200, 400, 361))  # empty matrix to record where we have explored in the closed list
+mat_cost = np.zeros((1200, 400, 361)) # saving the cost in a matrix
 # may want to move mat_exp earlier as we can designate obstacle space as 0
 while open_l.empty() != uu and res_g == 0:
      # pull out a node and add it to the closed list
@@ -125,12 +126,15 @@ while open_l.empty() != uu and res_g == 0:
                         id = id + 1
                         # lxu is cost to come plus cost to go
                         new_node = [cur_cost + lxu, id, cur_ind, new_pos]
+                        mat_cost[i_e][j_e][th_e] = cur_cost + lxu  #update the cost matrix
                         open_l.put(new_node)
                elif check_cl == 1 and check_ob == 1:
-                    m_co = p2_repeat_op(closed_l, new_pos)  # this is to get the cost of the repeat, needs to be remade
+                    m_co = mat_cost[i_e][j_e][th_e]  # this is to get the cost of the repeat, needs to be remade
                     lenj = closed_l.qsize()
                     if m_co > (cur_cost + lxu):
                         for j1 in range(0, lenj):
-                            if closed_l.queue[j1][4] == new_pos:
+                            if closed_l.queue[j1][3] == new_pos:
                                 m_i = closed_l.queue[j1][1]
                                 closed_l.queue[j1] = [cur_cost + lxu, m_i, cur_ind, new_pos]
+                                mat_cost[i_e][j_e][th_e] = cur_cost + lxu  # update the cost matrix
+                                

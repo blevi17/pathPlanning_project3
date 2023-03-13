@@ -1,11 +1,16 @@
 # This is the main python file for Path Planning Project 3
 # by Levi Butler and Julia MacOn Kim
+# GitHub repository: https://github.com/blevi17/pathPlanning_project3
 
 import numpy as np
 from queue import PriorityQueue
 import matplotlib.pyplot as plt
 from matplotlib import animation
 from sympy import *
+import time
+
+## used to time how long code takes to execute
+start_time = time.time()
 
 ##################################### Functions #####################################
 # pos_act = [x, y, theta], act is which one of the five actions
@@ -138,3 +143,6 @@ while open_l.empty() != uu and res_g == 0:
                                 closed_l.queue[j1] = [cur_cost + lxu, m_i, cur_ind, new_pos]
                                 mat_cost[i_e][j_e][th_e] = cur_cost + lxu  # update the cost matrix
                                 
+## used to time how long code takes to execute
+end_time = time.time()
+print('Total time (s):', end_time-start_time)

@@ -74,7 +74,13 @@ def mat_expl(node_exp):
 
     return x_exp, y_exp, th_exp
          
-         
+# define function to convert user input into node format
+def input2node(input):
+    output = []
+    for num in input.split(', '):
+        output.append(float(num))
+    return output
+  
 ############################################ Main code ###############################################
 
 # I liked Julia's function for prompting the user for inputs, could go here

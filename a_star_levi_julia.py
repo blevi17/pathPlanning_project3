@@ -105,18 +105,53 @@ for i in range(600):
             obs[i,j]=1
 
 # I liked Julia's function for prompting the user for inputs, could go here
+# Thanks! Updated input code below for new node format, and matched the variable names from your code below
+while 1:
+    try:
+        start_input = input("Start State:")
+        node_i = input2node(start_input)
+        if obs[int(node_i[0]),int(node_i[1])]==1:
+            print('Start State inside an obstacle. Try again...')
+        else:
+            break
+    except:
+        print('Input must be three integers separated by a comma and space (ex: 10, 10, 30). Acceptable range for first value: 1 to 600. Acceptable range for second value: 1 to 250. Acceptable range for third value: 0 to 359. Try again...')
+while 1:
+    try:
+        goal_input = input("Goal State:")
+        node_g = input2node(goal_input)
+        if obs[int(node_g[0]),int(node_g[1])]==1:
+            print('Goal State inside an obstacle. Try again...')
+        else:
+            break
+    except:
+        print('Input must be three integers separated by a comma and space (ex: 10, 10, 30). Acceptable range for first value: 1 to 600. Acceptable range for second value: 1 to 250. Acceptable range for third value: 0 to 359. Try again...')
+while 1:
+    try:
+        L = float(input("Step Size:"))
+        if 1<=L<=10:
+            print('Inputs accepted! Calculating...')
+            break
+        else:
+            print('Step size must be less than 10 and greater than 1. Try again...')
+    except:
+        print('Input must be a number between 1 and 10. Try again...')
+
 
 # I used Priority queue (I am surpised you did not use that or heap)
+# I will remove the comments above when I do a comment sweep for cleanliness
 # Initialize priority q
 open_l = PriorityQueue()
 closed_l = PriorityQueue()
-q3 = PriorityQueue()  # this is just for the while loop
-uu = q3.empty()
+#q3 = PriorityQueue()  # this is just for the while loop
+#uu = q3.empty()
 
 # Create the first element in the list
-node_i = []  # This needs to be changed to the customer input
-# [Cost, index, parent, [x, y, theta]]
+#node_i = []  # This needs to be changed to the customer input #done
+cost_go = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
+# [Total cost, cost to go, index, parent, [x, y, theta]] #will be easier to compute below if we track cost to go for each node
 el1 = [0, 0, 0, node_i]
+open_l.put(el1) # starting the open list
 
 # check if the initial node or goal nodes are in obstacle space
 

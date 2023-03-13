@@ -66,10 +66,13 @@ def action_m(pos_act, L_act, act):
      
 # This function converts the x, y, and theta list into the format needed for checking the tree (instructions: page 14, Second method) 
 def mat_expl(node_exp):
-    x_exp = round(2 * node_exp[0])
-    y_exp = round(2 * node_exp[1])
+    x_exp = round(2 * node_exp[0])-1 #subtract 1 to convert from coord (1-600) to index (0-599)
+    y_exp = round(2 * node_exp[1])-1 #subtract 1 to convert from coord (1-250) to index (0-249)
+    th_exp = round(node_exp[2]/30) #updated to use 30 degree threshold for theta
+    if th_exp == 12: #added this to fix an issue so 360 and 0 are treated as the same angle when indexing check matrices. There might be a better way to fix it than this
+        th_exp = 0
 
-    return x_exp, y_exp, node_exp[2]
+    return x_exp, y_exp, th_exp
          
          
 ############################################ Main code ###############################################

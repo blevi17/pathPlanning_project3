@@ -83,6 +83,27 @@ def input2node(input):
   
 ############################################ Main code ###############################################
 
+### I got it to run without errors but I think it is getting stuck in a loop without finding the goal node and I'm stuck trying to figure out where/why
+
+# define obstacle space with 5mm clearance; 0=free space, 1=obstacle space
+obs = np.zeros((600,250))
+for i in range(600):
+    # print('i',i)
+    for j in range(250):
+        # print('j',j)
+        if j<=105 and 95<=i<=155: #bottom rectangle definition w/ margin
+            obs[i,j]=1
+        elif j>=145 and 95<=i<=155: #top rectangle definition w/ margin
+            obs[i,j]=1
+        elif i>=455 and j>=2*i-906 and j<=-2*i+1156 and 20<=j<=230: #triangle definition w/ margin
+            obs[i,j]=1
+        elif 230<=i<=370 and j<=0.5774*i+32.7949 and j<=-0.5774*i+379.2051 and j>=-0.5774*i+217.2051 and j>=0.5774*i-129.2051: #hexagon definiton w/ margin
+            obs[i,j]=1
+        elif 0<=i<=4 or 595<=i<=599: #vertical wall margin
+            obs[i,j]=1
+        elif 0<=j<=4 or 245<=j<=249: #horizonal wall margin
+            obs[i,j]=1
+
 # I liked Julia's function for prompting the user for inputs, could go here
 
 # I used Priority queue (I am surpised you did not use that or heap)

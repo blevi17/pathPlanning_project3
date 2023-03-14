@@ -206,15 +206,17 @@ while not open_l.empty():
                cost_come = cur_cost - cost_go.copy() + L #.copy() is because I had a bug earlier with updating variables in a loop and using a copy fixed it
                cost_go = np.sqrt((node_g[0]-new_pos_round[0])**2 + (node_g[1]-new_pos_round[1])**2)
                lxu = cost_come+cost_go
-               
-               if check_cl == 0 and check_ob == 1:
+
+               if check_ob == 1: #decoupled the checks into separate statements
+                    continue #we can skip all the updating code if the new node is in the obstacle space
+               if check_cl == 0:
                     # mat_exp_cl[i_e][j_e][th_e] = 1  # now we have explored this in the closed list
                     if check_ol == 0:
                         mat_exp_ol[i_e][j_e][th_e] = 1
                         id = id + 1
                         # lxu is cost to come plus cost to go
-                        new_node = [cur_cost + lxu, id, cur_ind, new_pos]
-                        mat_cost[i_e][j_e][th_e] = cur_cost + lxu  #update the cost matrix
+                        new_node = [lxu, cost_go, id, cur_ind, new_pos]
+                        mat_cost[i_e][j_e][th_e] = lxu  #update the cost matrix
                         open_l.put(new_node)
                elif check_cl == 1 and check_ob == 1:
                     m_co = mat_cost[i_e][j_e][th_e]  # this is to get the cost of the repeat, needs to be remade

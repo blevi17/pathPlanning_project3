@@ -80,6 +80,24 @@ def input2node(input):
     for num in input.split(', '):
         output.append(float(num))
     return output
+
+# This reverses a list
+def reverse_list(listio):
+    new_list = []
+    for i_l in range(1, len(listio) + 1):
+        new_list.append(listio[-1*i_l])
+    return new_list
+
+# This searches through a queue, finding the parents of indexes until it reaches the initial node
+def trace_back(q_cl, par, cur_ind):
+    path = [cur_ind, par]
+    while par != 0:
+        len = q_cl.qsize()
+        for it in range(0, len):
+            if q_cl.queue[it][1] == par:
+                path.append(q_cl.queue[it][2])
+                par = q_cl.queue[it][2]
+    trace_res = reverse_list(path)
   
 ############################################ Main code ###############################################
 
@@ -181,7 +199,7 @@ while not open_l.empty():
      # check if we have reached the goal
      if cur_pos == node_g:  # Need to add the goal node input
           # run the backtrack function
-          #node_path = trace_back(close_l, cur_par, cur_ind)
+          node_path = trace_back(closed_l, cur_par, cur_ind)
           ## added to the print line below to verify that final state is correct
           print("Success! Confirm final state:",'('+str(cur_pos[0])+', '+str(cur_pos[1])+', '+str(cur_pos[2])+')')
           # res_g = 1

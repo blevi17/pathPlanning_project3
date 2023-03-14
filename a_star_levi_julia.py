@@ -190,12 +190,23 @@ while not open_l.empty():
      else:
           for i in range(0, 5):
                new_pos = action_m(cur_pos, L, i)  # L is the user input for the step size of the robot
+               # keep theta value between 0 and 359
+               if new_pos[2]>359:
+                   new_pos[2] = new_pos[2]-360
+               elif new_pos[2]<0:
+                   new_pos[2] = new_pos[2]+360
                # Check if the new location is in the closed list or obstacle space
                i_e, j_e, th_e = mat_expl(new_pos)
                check_cl = mat_exp_cl[i_e][j_e][th_e]
                check_ol = mat_exp_ol[i_e][j_e][th_e]
+               check_ob = obs[i_e][j_e] #no theta value for obstacles ##The obstacle matrix needs to be updated to match the new resolution
+               new_pos_round = ((i_e+1)/2, (j_e+1)/2, (th_e)*30) ##added for now, so the if statement to update open list works. Need to continue troubleshooting why that check produces error if new_pos is not rounded to the threshold grid
                #check_ob = p2_coll(new_l)
                # need to add lxu = cost2come + cost2go
+               cost_come = cur_cost - cost_go.copy() + L #.copy() is because I had a bug earlier with updating variables in a loop and using a copy fixed it
+               cost_go = np.sqrt((node_g[0]-new_pos_round[0])**2 + (node_g[1]-new_pos_round[1])**2)
+               lxu = cost_come+cost_go
+               
                if check_cl == 0 and check_ob == 1:
                     # mat_exp_cl[i_e][j_e][th_e] = 1  # now we have explored this in the closed list
                     if check_ol == 0:

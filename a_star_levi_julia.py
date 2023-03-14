@@ -152,33 +152,40 @@ cost_go = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
 # [Total cost, cost to go, index, parent, [x, y, theta]] #will be easier to compute below if we track cost to go for each node
 el1 = [0, 0, 0, node_i]
 open_l.put(el1) # starting the open list
-
 # check if the initial node or goal nodes are in obstacle space
-
 
 # Starting the search
 res_g = 0  # becomes 1 or something else when we reach the goal
 id = el1[1]
-mat_exp_ol = np.zeros((1200, 400, 361))  # empty matrix to record where we have explored in the open list
-mat_exp_cl = np.zeros((1200, 400, 361))  # empty matrix to record where we have explored in the closed list
-mat_cost = np.zeros((1200, 400, 361)) # saving the cost in a matrix
+mat_exp_ol = np.zeros((1200, 500, 12))  # empty matrix to record where we have explored in the open list
+mat_exp_cl = np.zeros((1200, 400, 12))  # empty matrix to record where we have explored in the closed list
+mat_cost = np.zeros((1200, 500, 12)) # saving the cost in a matrix
 # may want to move mat_exp earlier as we can designate obstacle space as 0
-while open_l.empty() != uu and res_g == 0:
+# I think the shape of mat_exp should be 1200, 500, 12 using the thresholds from slide 14
+while not open_l.empty():
      # pull out a node and add it to the closed list
      x = open_l.get()
      closed_l.put(x)
      # pull out useful elements
      cur_cost = x[0]
-     cur_ind = x[1]
-     cur_par = x[2]
+     cost_go = x[1]
+     cur_ind = x[2]
+     cur_par = x[3]
      cur_pos = x[4]
+
+     ## we should update closed record outside of the loop with node we are currently exploring
+     i_e, j_e, th_e = mat_expl(cur_pos)
+     # print(i_e, j_e, th_e) #used for a bug check
+     mat_exp_cl[i_e][j_e][th_e] = 1  # now we have explored this in the closed list
     
      # check if we have reached the goal
      if cur_pos == node_g:  # Need to add the goal node input
           # run the backtrack function
           #node_path = trace_back(close_l, cur_par, cur_ind)
-          print("success")
-          res_g = 1
+          ## added to the print line below to verify that final state is correct
+          print("Success! Confirm final state:",'('+str(cur_pos[0])+', '+str(cur_pos[1])+', '+str(cur_pos[2])+')')
+          # res_g = 1
+          break
      # perform all possible movements
      else:
           for i in range(0, 5):

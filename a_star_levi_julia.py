@@ -168,7 +168,7 @@ closed_l = PriorityQueue()
 #node_i = []  # This needs to be changed to the customer input #done
 cost_go = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
 # [Total cost, cost to go, index, parent, [x, y, theta]] #will be easier to compute below if we track cost to go for each node
-el1 = [0, 0, 0, node_i]
+el1 = [0, 0, 0, 0, node_i]
 open_l.put(el1) # starting the open list
 # check if the initial node or goal nodes are in obstacle space
 
@@ -222,7 +222,7 @@ while not open_l.empty():
                new_pos_round = ((i_e+1)/2, (j_e+1)/2, (th_e)*30) ##added for now, so the if statement to update open list works. Need to continue troubleshooting why that check produces error if new_pos is not rounded to the threshold grid
                #check_ob = p2_coll(new_l)
                # need to add lxu = cost2come + cost2go
-               cost_come = cur_cost - cost_go.copy() + L #.copy() is because I had a bug earlier with updating variables in a loop and using a copy fixed it
+               cost_come = cur_cost - cost_go + L #.copy() is because I had a bug earlier with updating variables in a loop and using a copy fixed it
                cost_go = np.sqrt((node_g[0]-new_pos_round[0])**2 + (node_g[1]-new_pos_round[1])**2)
                lxu = cost_come+cost_go
 

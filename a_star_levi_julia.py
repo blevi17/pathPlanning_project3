@@ -244,9 +244,12 @@ while not open_l.empty():
                         check_idx = [item[4] for item in open_l.queue]
                         idx=check_idx.index(new_pos_round) #this should eliminate need for a for loop
                         if m_co >  lxu:
-                            open_l.queue[idx][0] = lxu
-                            open_l.queue[idx][1] = cost_go
-                            open_l.queue[idx][3] = cur_ind
+                            rep_pos = open_l.queue[idx][4]
+                            rep_ind = open_l.queue[idx][2]
+                            rep_node = open_l.queue[idx]
+                            open_l.queue.remove(rep_node)
+                            imp_q = [lxu, cost_go, rep_ind, cur_ind, rep_pos]
+                            open_l.put(imp_q)
                         #for j1 in range(0, lenj):
                          #   if closed_l.queue[j1][3] == new_pos:
                           #      m_i = closed_l.queue[j1][1]

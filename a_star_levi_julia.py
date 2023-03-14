@@ -104,22 +104,22 @@ def trace_back(q_cl, par, cur_ind):
 ### I got it to run without errors but I think it is getting stuck in a loop without finding the goal node and I'm stuck trying to figure out where/why
 
 # define obstacle space with 5mm clearance; 0=free space, 1=obstacle space
-obs = np.zeros((600,250))
-for i in range(600):
+obs = np.zeros((1200,500))
+for i in range(1200):
     # print('i',i)
-    for j in range(250):
+    for j in range(500):
         # print('j',j)
-        if j<=105 and 95<=i<=155: #bottom rectangle definition w/ margin
+        if j<=210 and 190<=i<=310: #bottom rectangle definition w/ margin
             obs[i,j]=1
-        elif j>=145 and 95<=i<=155: #top rectangle definition w/ margin
+        elif j>=290 and 190<=i<=310: #top rectangle definition w/ margin
             obs[i,j]=1
-        elif i>=455 and j>=2*i-906 and j<=-2*i+1156 and 20<=j<=230: #triangle definition w/ margin
+        elif i>=910 and j>=2*i-1812 and j<=-2*i+2312 and 40<=j<=460: #triangle definition w/ margin
             obs[i,j]=1
-        elif 230<=i<=370 and j<=0.5774*i+32.7949 and j<=-0.5774*i+379.2051 and j>=-0.5774*i+217.2051 and j>=0.5774*i-129.2051: #hexagon definiton w/ margin
+        elif 460<=i<=740 and j<=0.5774*i+65.5898 and j<=-0.5774*i+758.4102 and j>=-0.5774*i+434.4102 and j>=0.5774*i-258.4102: #hexagon definiton w/ margin
             obs[i,j]=1
-        elif 0<=i<=4 or 595<=i<=599: #vertical wall margin
+        elif 0<=i<=9 or 1190<=i<=1199: #vertical wall margin
             obs[i,j]=1
-        elif 0<=j<=4 or 245<=j<=249: #horizonal wall margin
+        elif 0<=j<=9 or 490<=j<=499: #horizonal wall margin
             obs[i,j]=1
 
 # I liked Julia's function for prompting the user for inputs, could go here
@@ -128,7 +128,7 @@ while 1:
     try:
         start_input = input("Start State:")
         node_i = input2node(start_input)
-        if obs[int(node_i[0]),int(node_i[1])]==1:
+        if obs[int(2*node_i[0]),int(2*node_i[1])]==1:
             print('Start State inside an obstacle. Try again...')
         else:
             break
@@ -138,7 +138,7 @@ while 1:
     try:
         goal_input = input("Goal State:")
         node_g = input2node(goal_input)
-        if obs[int(node_g[0]),int(node_g[1])]==1:
+        if obs[int(2*node_g[0]),int(2*node_g[1])]==1:
             print('Goal State inside an obstacle. Try again...')
         else:
             break

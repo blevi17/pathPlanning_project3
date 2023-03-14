@@ -228,7 +228,7 @@ while not open_l.empty():
 
                if check_ob == 1: #decoupled the checks into separate statements
                     continue #we can skip all the updating code if the new node is in the obstacle space
-               if check_cl == 0:
+               elif check_cl == 0:
                     # mat_exp_cl[i_e][j_e][th_e] = 1  # now we have explored this in the closed list
                     if check_ol == 0:
                         mat_exp_ol[i_e][j_e][th_e] = 1
@@ -237,15 +237,23 @@ while not open_l.empty():
                         new_node = [lxu, cost_go, id, cur_ind, new_pos]
                         mat_cost[i_e][j_e][th_e] = lxu  #update the cost matrix
                         open_l.put(new_node)
-               elif check_cl == 1 and check_ob == 1:
-                    m_co = mat_cost[i_e][j_e][th_e]  # this is to get the cost of the repeat, needs to be remade
-                    lenj = closed_l.qsize()
-                    if m_co > (cur_cost + lxu):
-                        for j1 in range(0, lenj):
-                            if closed_l.queue[j1][3] == new_pos:
-                                m_i = closed_l.queue[j1][1]
-                                closed_l.queue[j1] = [cur_cost + lxu, m_i, cur_ind, new_pos]
-                                mat_cost[i_e][j_e][th_e] = cur_cost + lxu  # update the cost matrix
+                    ## below if statement moved from check_cl==1 section below, and updated for open list
+                    elif check_cl == 1:
+                        m_co = mat_cost[i_e][j_e][th_e]  # this is to get the cost of the repeat, needs to be remade
+                        #lenj = closed_l.qsize()
+                        check_idx = [item[4] for item in open_l.queue]
+                        idx=check_idx.index(new_pos_round) #this should eliminate need for a for loop
+                        if m_co >  lxu:
+                            open_l.queue[idx][0] = lxu
+                            open_l.queue[idx][1] = cost_go
+                            open_l.queue[idx][3] = cur_ind
+                        #for j1 in range(0, lenj):
+                         #   if closed_l.queue[j1][3] == new_pos:
+                          #      m_i = closed_l.queue[j1][1]
+                           #     closed_l.queue[j1] = [cur_cost + lxu, m_i, cur_ind, new_pos]
+                            #    mat_cost[i_e][j_e][th_e] = cur_cost + lxu  # update the cost matrix
+               elif check_cl == 1:
+                   continue
                                 
 ## used to time how long code takes to execute
 end_time = time.time()

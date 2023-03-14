@@ -197,7 +197,8 @@ while not open_l.empty():
      mat_exp_cl[i_e][j_e][th_e] = 1  # now we have explored this in the closed list
     
      # check if we have reached the goal
-     if cur_pos == node_g:  # Need to add the goal node input
+     thresh = np.sqrt((cur_pos[0] - node_g[0])**2 + (cur_pos[1] - node_g[1])**2)
+     if thresh <= 1.5:  
           # run the backtrack function
           node_path = trace_back(closed_l, cur_par, cur_ind)
           ## added to the print line below to verify that final state is correct

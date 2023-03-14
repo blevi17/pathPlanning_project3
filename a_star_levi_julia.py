@@ -197,7 +197,7 @@ while not open_l.empty():
                #check_ob = p2_coll(new_l)
                # need to add lxu = cost2come + cost2go
                if check_cl == 0 and check_ob == 1:
-                    mat_exp_cl[i_e][j_e][th_e] = 1  # now we have explored this in the closed list
+                    # mat_exp_cl[i_e][j_e][th_e] = 1  # now we have explored this in the closed list
                     if check_ol == 0:
                         mat_exp_ol[i_e][j_e][th_e] = 1
                         id = id + 1

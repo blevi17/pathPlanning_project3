@@ -94,9 +94,9 @@ def trace_back(q_cl, par, cur_ind):
     while par != 0:
         len = q_cl.qsize()
         for it in range(0, len):
-            if q_cl.queue[it][1] == par:
-                path.append(q_cl.queue[it][2])
-                par = q_cl.queue[it][2]
+            if q_cl.queue[it][2] == par:
+                path.append(q_cl.queue[it][3])
+                par = q_cl.queue[it][3]
     trace_res = reverse_list(path)
   
 ############################################ Main code ###############################################

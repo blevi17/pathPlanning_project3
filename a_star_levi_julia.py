@@ -240,7 +240,7 @@ while not open_l.empty():
                         mat_cost[i_e][j_e][th_e] = lxu  #update the cost matrix
                         open_l.put(new_node)
                     ## below if statement moved from check_cl==1 section below, and updated for open list
-                    elif check_cl == 1:
+                    elif check_ol == 1:
                         m_co = mat_cost[i_e][j_e][th_e]  # this is to get the cost of the repeat, needs to be remade
                         #lenj = closed_l.qsize()
                         check_idx = [item[4] for item in open_l.queue]

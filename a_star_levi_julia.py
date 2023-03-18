@@ -98,6 +98,8 @@ def trace_back(q_cl, par, cur_ind):
                 path.append(q_cl.queue[it][3])
                 par = q_cl.queue[it][3]
     trace_res = reverse_list(path)
+
+    return trace_res
   
 ############################################ Main code ###############################################
 
@@ -273,9 +275,55 @@ for i in range(600):
             x_obs.append(i)
             y_obs.append(j)
 
+# save closed explored x and y points
+plt1_size = closed_l.qsize()
+x_exp1 = []
+y_exp1 = []
+xth_exp1 = []
+yth_exp1 = []
+for i1_plot in range(0, plt1_size):
+    x_exp1.append(closed_l.queue[i1_plot][4][0])
+    y_exp1.append(closed_l.queue[i1_plot][4][1])
+    xth_exp1.append(float(L * cos(closed_l.queue[i1_plot][4][2] * pi / 180)))
+    yth_exp1.append(float(L * sin(closed_l.queue[i1_plot][4][2] * pi / 180)))
+
+# save the open explored points
+plt2_size = open_l.qsize()
+x_exp2 = []
+y_exp2 = []
+xth_exp2 = []
+yth_exp2 = []
+for i2_plot in range(0, plt2_size):
+    x_exp2.append(open_l.queue[i2_plot][4][0])
+    y_exp2.append(open_l.queue[i2_plot][4][1])
+    xth_exp2.append(float(L * cos(open_l.queue[i2_plot][4][2] * pi / 180)))
+    yth_exp2.append(float(L * sin(open_l.queue[i2_plot][4][2] * pi / 180)))
+
+# record the path
+print(node_path)
+len_pa = len(node_path)
+x_pa = []
+y_pa = []
+xth_pa = []
+yth_pa = []
+for i_pa in range(0, len_pa):
+    ind_pa = node_path[i_pa]
+    for j_pa in range(0, plt1_size):
+        if closed_l.queue[j_pa][2] == ind_pa:
+            x_pa.append(closed_l.queue[j_pa][4][0])
+            y_pa.append(closed_l.queue[j_pa][4][1])
+            xth_pa.append(float(L * cos(closed_l.queue[j_pa][4][2] * pi / 180)))
+            yth_pa.append(float(L * sin(closed_l.queue[j_pa][4][2] * pi / 180)))
+
 #plotting the obstacle space
-fig = plt.figure()
+fig, ax = plt.subplots(figsize=(12, 7))
+#fig = plt.figure()
 plt.plot(x_obs, y_obs, 'b.', markersize=1)
 plt.xlim((0, 600))
 plt.ylim((0, 250))
+
+# plot all of the explored points in a test
+for i in range(len(x_exp1)):
+    ax.quiver(x_exp1[i], y_exp1[i], xth_exp1[i], yth_exp1[i], angles='xy', scale_units='xy', scale=1, width=0.005)
+
 plt.show()

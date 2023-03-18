@@ -319,11 +319,14 @@ for i_pa in range(0, len_pa):
 fig, ax = plt.subplots(figsize=(12, 7))
 #fig = plt.figure()
 plt.plot(x_obs, y_obs, 'b.', markersize=1)
-plt.xlim((0, 600))
-plt.ylim((0, 250))
+plt.xlim((0, 60))
+plt.ylim((0, 60))
 
 # plot all of the explored points in a test
-for i in range(len(x_exp1)):
-    ax.quiver(x_exp1[i], y_exp1[i], xth_exp1[i], yth_exp1[i], angles='xy', scale_units='xy', scale=1, width=0.005)
+def animate(fr):
+    # for i in range(fr):
+    ax.quiver(x_exp1[fr], y_exp1[fr], xth_exp1[fr], yth_exp1[fr], color="red", angles='xy', scale_units='xy', scale=1, width=0.005)
+
+anim = animation.FuncAnimation(fig, animate,frames=(len(x_exp1)), interval=1)
 
 plt.show()

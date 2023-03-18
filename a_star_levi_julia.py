@@ -188,7 +188,7 @@ while not open_l.empty():
      closed_l.put(x)
      # pull out useful elements
      cur_cost = x[0]
-     cost_go = x[1]
+     cur_go = x[1]
      cur_ind = x[2]
      cur_par = x[3]
      cur_pos = x[4]
@@ -224,7 +224,7 @@ while not open_l.empty():
                new_pos_round = ((i_e+1)/2, (j_e+1)/2, (th_e)*30) ##added for now, so the if statement to update open list works. Need to continue troubleshooting why that check produces error if new_pos is not rounded to the threshold grid
                #check_ob = p2_coll(new_l)
                # need to add lxu = cost2come + cost2go
-               cost_come = cur_cost - cost_go + L #.copy() is because I had a bug earlier with updating variables in a loop and using a copy fixed it
+               cost_come = cur_go + L #.copy() is because I had a bug earlier with updating variables in a loop and using a copy fixed it
                cost_go = np.sqrt((node_g[0]-new_pos_round[0])**2 + (node_g[1]-new_pos_round[1])**2)
                lxu = cost_come+cost_go
 
@@ -243,9 +243,15 @@ while not open_l.empty():
                     elif check_ol == 1:
                         m_co = mat_cost[i_e][j_e][th_e]  # this is to get the cost of the repeat, needs to be remade
                         #lenj = closed_l.qsize()
-                        check_idx = [item[4] for item in open_l.queue]
-                        idx=check_idx.index(new_pos_round) #this should eliminate need for a for loop
+                        #check_idx = [item[4] for item in open_l.queue]
+                        #idx=check_idx.index(new_pos_round) #this should eliminate need for a for loop
                         if m_co >  lxu:
+                            # I added a for loop as I got errors from the code commented out above
+                            for j in range(0, open_l.qsize()):
+                                check_pos = open_l.queue[j][4]
+                                i_c, j_c, th_c = mat_expl(check_pos)
+                                if i_c == i_e and j_c == j_e and th_c == th_e:
+                                    idx = j
                             rep_pos = open_l.queue[idx][4]
                             rep_ind = open_l.queue[idx][2]
                             rep_node = open_l.queue[idx]
@@ -326,7 +332,7 @@ plt.ylim((0, 250))
 len_cl = len(x_exp1)
 len_pa = len(x_pa)
 def animate(fr):
-    i_a = 200 * fr
+    i_a = fr * 50
     if i_a < len_cl:
         ax.quiver(x_exp1[0:i_a], y_exp1[0:i_a], xth_exp1[0:i_a], yth_exp1[0:i_a], color="red", angles='xy', scale_units='xy', scale=1, width=0.005)
     else:

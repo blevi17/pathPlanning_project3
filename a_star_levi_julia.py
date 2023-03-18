@@ -106,10 +106,10 @@ def trace_back(q_cl, par, cur_ind):
 ### I got it to run without errors but I think it is getting stuck in a loop without finding the goal node and I'm stuck trying to figure out where/why
 
 # define obstacle space with 5mm clearance; 0=free space, 1=obstacle space
-obs = np.zeros((1200,500))
-for i in range(1200):
+obs = np.zeros((1207,507))
+for i in range(1207):
     # print('i',i)
-    for j in range(500):
+    for j in range(507):
         # print('j',j)
         if j<=210 and 190<=i<=310: #bottom rectangle definition w/ margin
             obs[i,j]=1
@@ -177,9 +177,9 @@ open_l.put(el1) # starting the open list
 # Starting the search
 res_g = 0  # becomes 1 or something else when we reach the goal
 id = el1[1]
-mat_exp_ol = np.zeros((1200, 500, 12))  # empty matrix to record where we have explored in the open list
-mat_exp_cl = np.zeros((1200, 500, 12))  # empty matrix to record where we have explored in the closed list
-mat_cost = np.zeros((1200, 500, 12)) # saving the cost in a matrix
+mat_exp_ol = np.zeros((1207, 507, 12))  # empty matrix to record where we have explored in the open list
+mat_exp_cl = np.zeros((1207, 507, 12))  # empty matrix to record where we have explored in the closed list
+mat_cost = np.zeros((1207, 507, 12)) # saving the cost in a matrix
 # may want to move mat_exp earlier as we can designate obstacle space as 0
 # I think the shape of mat_exp should be 1200, 500, 12 using the thresholds from slide 14
 while not open_l.empty():
@@ -221,11 +221,11 @@ while not open_l.empty():
                check_cl = mat_exp_cl[i_e][j_e][th_e]
                check_ol = mat_exp_ol[i_e][j_e][th_e]
                check_ob = obs[i_e][j_e] #no theta value for obstacles ##The obstacle matrix needs to be updated to match the new resolution
-               new_pos_round = ((i_e+1)/2, (j_e+1)/2, (th_e)*30) ##added for now, so the if statement to update open list works. Need to continue troubleshooting why that check produces error if new_pos is not rounded to the threshold grid
+               #new_pos_round = ((i_e+1)/2, (j_e+1)/2, (th_e)*30) ##added for now, so the if statement to update open list works. Need to continue troubleshooting why that check produces error if new_pos is not rounded to the threshold grid
                #check_ob = p2_coll(new_l)
                # need to add lxu = cost2come + cost2go
                cost_come = cur_go + L #.copy() is because I had a bug earlier with updating variables in a loop and using a copy fixed it
-               cost_go = np.sqrt((node_g[0]-new_pos_round[0])**2 + (node_g[1]-new_pos_round[1])**2)
+               cost_go = 2 * np.sqrt((node_g[0]-cur_pos[0])**2 + (node_g[1]-cur_pos[1])**2)
                lxu = cost_come+cost_go
 
                if check_ob == 1: #decoupled the checks into separate statements
@@ -236,7 +236,7 @@ while not open_l.empty():
                         mat_exp_ol[i_e][j_e][th_e] = 1
                         id = id + 1
                         # lxu is cost to come plus cost to go
-                        new_node = [lxu, cost_go, id, cur_ind, new_pos]
+                        new_node = [lxu, cost_come, id, cur_ind, new_pos]
                         mat_cost[i_e][j_e][th_e] = lxu  #update the cost matrix
                         open_l.put(new_node)
                     ## below if statement moved from check_cl==1 section below, and updated for open list
@@ -256,7 +256,7 @@ while not open_l.empty():
                             rep_ind = open_l.queue[idx][2]
                             rep_node = open_l.queue[idx]
                             open_l.queue.remove(rep_node)
-                            imp_q = [lxu, cost_go, rep_ind, cur_ind, rep_pos]
+                            imp_q = [lxu, cost_come, rep_ind, cur_ind, rep_pos]
                             open_l.put(imp_q)
                         #for j1 in range(0, lenj):
                          #   if closed_l.queue[j1][3] == new_pos:
@@ -332,7 +332,7 @@ plt.ylim((0, 250))
 len_cl = len(x_exp1)
 len_pa = len(x_pa)
 def animate(fr):
-    i_a = fr * 50
+    i_a = fr * 10
     if i_a < len_cl:
         ax.quiver(x_exp1[0:i_a], y_exp1[0:i_a], xth_exp1[0:i_a], yth_exp1[0:i_a], color="red", angles='xy', scale_units='xy', scale=1, width=0.005)
     else:

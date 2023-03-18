@@ -261,3 +261,21 @@ while not open_l.empty():
 ## used to time how long code takes to execute
 end_time = time.time()
 print('Total time (s):', end_time-start_time)
+
+# get points in the obstacle space
+x_obs = []
+y_obs = []
+for i in range(600):
+    for j in range(250):
+        xi = 2 * i - 1
+        yi = 2 * j - 1
+        if obs[xi, yi] == 1:
+            x_obs.append(i)
+            y_obs.append(j)
+
+#plotting the obstacle space
+fig = plt.figure()
+plt.plot(x_obs, y_obs, 'b.', markersize=1)
+plt.xlim((0, 600))
+plt.ylim((0, 250))
+plt.show()

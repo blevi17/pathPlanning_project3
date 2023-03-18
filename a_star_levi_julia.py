@@ -178,7 +178,7 @@ open_l.put(el1) # starting the open list
 res_g = 0  # becomes 1 or something else when we reach the goal
 id = el1[1]
 mat_exp_ol = np.zeros((1200, 500, 12))  # empty matrix to record where we have explored in the open list
-mat_exp_cl = np.zeros((1200, 400, 12))  # empty matrix to record where we have explored in the closed list
+mat_exp_cl = np.zeros((1200, 500, 12))  # empty matrix to record where we have explored in the closed list
 mat_cost = np.zeros((1200, 500, 12)) # saving the cost in a matrix
 # may want to move mat_exp earlier as we can designate obstacle space as 0
 # I think the shape of mat_exp should be 1200, 500, 12 using the thresholds from slide 14
@@ -319,14 +319,20 @@ for i_pa in range(0, len_pa):
 fig, ax = plt.subplots(figsize=(12, 7))
 #fig = plt.figure()
 plt.plot(x_obs, y_obs, 'b.', markersize=1)
-plt.xlim((0, 60))
-plt.ylim((0, 60))
+plt.xlim((0, 600))
+plt.ylim((0, 250))
 
 # plot all of the explored points in a test
+len_cl = len(x_exp1)
+len_pa = len(x_pa)
 def animate(fr):
-    # for i in range(fr):
-    ax.quiver(x_exp1[fr], y_exp1[fr], xth_exp1[fr], yth_exp1[fr], color="red", angles='xy', scale_units='xy', scale=1, width=0.005)
+    i_a = 200 * fr
+    if i_a < len_cl:
+        ax.quiver(x_exp1[0:i_a], y_exp1[0:i_a], xth_exp1[0:i_a], yth_exp1[0:i_a], color="red", angles='xy', scale_units='xy', scale=1, width=0.005)
+    else:
+        i_b = i_a - len_cl
+        ax.quiver(x_pa[0:i_b], y_pa[0:i_b], xth_exp1[0:i_b], yth_exp1[0:i_b], color="blue", angles='xy', scale_units='xy', scale=1, width=0.005)
 
-anim = animation.FuncAnimation(fig, animate,frames=(len(x_exp1)), interval=1)
+anim = animation.FuncAnimation(fig, animate,frames=(len_cl + len_pa), interval=1)
 
 plt.show()

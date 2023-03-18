@@ -18,3 +18,5 @@ Instructions:
     1. Run file: a_star_levi_julia.py
     2. Input start and goal nodes when prompted, in format x, y, theta. Theta should be in degrees. ex: 10, 20, 30
     3. Input step size between 1 and 10 (inclusive)
+    4. Wait for the code to calculate results
+    5. The code will output a plot of the path in the obstacle space

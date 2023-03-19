@@ -170,15 +170,14 @@ closed_l = PriorityQueue()
 #node_i = []  # This needs to be changed to the customer input #done
 cost_go = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
 if cost_go < 250:
-    c_w = 2
-    v_w = 300
+    c_w = 1.5
+    v_w = 200
 elif cost_go < 375:
-    c_w = 2
-    v_w = 350
+    c_w = 1.5
+    v_w = 250
 else:
     c_w = 3.75
     v_w = 550
-print(cost_go)
 # [Total cost, cost to go, index, parent, [x, y, theta]] #will be easier to compute below if we track cost to go for each node
 el1 = [0, 0, 0, 0, node_i]
 open_l.put(el1) # starting the open list

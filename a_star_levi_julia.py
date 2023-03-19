@@ -208,7 +208,7 @@ while not open_l.empty():
             print("Success! Confirm final state:",'('+str(cur_pos[0])+', '+str(cur_pos[1])+', '+str(cur_pos[2])+')')
             break
         else:
-            while cur_pos[2] == node_g[2]:
+            while cur_pos[2] != node_g[2]:
                 if ((cur_pos[2] - node_g[2])**2 % 3600) == 0:
                     first_act = 4
                 else:
@@ -283,7 +283,7 @@ while not open_l.empty():
                 # Fix the angle after returning to the goal location
                 if m6[2] > 359:
                     m6[2] = m6[2] - 360
-                elif [2] < 0:
+                elif m6[2] < 0:
                     m6[2] = m6[2] + 360
                 # update useful elements
                 cur_cost = x[0] + 6 * L
@@ -291,6 +291,10 @@ while not open_l.empty():
                 cur_ind = id
                 cur_par = id - 1
                 cur_pos = m6
+            ## added to the print line below to verify that final state is correct
+            node_path = trace_back(closed_l, cur_par, cur_ind)
+            print("Success! Confirm final state:",'('+str(cur_pos[0])+', '+str(cur_pos[1])+', '+str(cur_pos[2])+')')
+            break
                 
     # perform all possible movements
     else:
@@ -310,7 +314,7 @@ while not open_l.empty():
             #check_ob = p2_coll(new_l)
             # need to add lxu = cost2come + cost2go
             cost_come = cur_go + L #.copy() is because I had a bug earlier with updating variables in a loop and using a copy fixed it
-            cost_go = np.sqrt((node_g[0]-cur_pos[0])**2 + (node_g[1]-cur_pos[1])**2)
+            cost_go = 3.75 * np.sqrt((node_g[0]-cur_pos[0])**2 + (node_g[1]-cur_pos[1])**2)
             lxu = cost_come+cost_go
 
             if check_ob == 1: #decoupled the checks into separate statements
@@ -416,7 +420,7 @@ plt.ylim((0, 250))
 len_cl = len(x_exp1)
 len_pa = len(x_pa)
 def animate(fr):
-    i_a = fr * 20
+    i_a = fr * 500
     if i_a < len_cl:
         ax.quiver(x_exp1[0:i_a], y_exp1[0:i_a], xth_exp1[0:i_a], yth_exp1[0:i_a], color="red", angles='xy', scale_units='xy', scale=1, width=0.005)
     elif i_a < (len_cl + len_pa):

@@ -1,6 +1,7 @@
 # pathPlanning_project3
 This is the Path Planning Project 3 Github Repository of Levi Butler and Julia Macon Kim
 https://github.com/blevi17/pathPlanning_project3
+The video for this project is included in the Google Drive at the link below.  It has been shared with the grader's UMD email
 https://drive.google.com/drive/folders/1ldhUVX8oixbI-aBnXRxFGbcc3iJEyZbO
 
 Team member names and IDs:

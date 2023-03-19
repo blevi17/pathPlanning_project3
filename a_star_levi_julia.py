@@ -1,5 +1,5 @@
 # This is the main python file for Path Planning Project 3
-# by Levi Butler and Julia MacOn Kim
+# by Levi Butler and Julia Macon Kim
 # GitHub repository: https://github.com/blevi17/pathPlanning_project3
 
 import numpy as np
@@ -15,53 +15,53 @@ start_time = time.time()
 ##################################### Functions #####################################
 # pos_act = [x, y, theta], act is which one of the five actions
 def action_m(pos_act, L_act, act):
-     x_act = pos_act[0]
-     y_act = pos_act[1]
-     th_act = pos_act[2]
-     # move forward
-     if act == 1:
-         ang = th_act * pi / 180
-         x_add = L_act * cos(ang)
-         y_add = L_act * sin(ang)
-         x_new = float(x_act + x_add)
-         y_new = float(y_act + y_add)
-         th_new = th_act
-     # move counter-clockwise 30 
-     elif act == 2:
-         ang = (th_act + 30) * pi / 180
-         x_add = float(L_act * cos(ang))
-         y_add = float(L_act * sin(ang))
-         x_new = x_act + x_add
-         y_new = y_act + y_add
-         th_new = th_act + 30
-     # move counter-clockwise 60 
-     elif act == 3:
-         ang = (th_act + 60) * pi / 180
-         x_add = float(L_act * cos(ang))
-         y_add = float(L_act * sin(ang))
-         x_new = x_act + x_add
-         y_new = y_act + y_add
-         th_new = th_act + 60
-     # move clockwise 30 
-     elif act == 4:
-         ang = (th_act - 30) * pi / 180
-         x_add = float(L_act * cos(ang))
-         y_add = float(L_act * sin(ang))
-         x_new = x_act + x_add
-         y_new = y_act + y_add
-         th_new = th_act - 30
-     # move clockwise 60 
-     else:
-         ang = (th_act - 60) * pi / 180
-         x_add = float(L_act * cos(ang))
-         y_add = float(L_act * sin(ang))
-         x_new = x_act + x_add
-         y_new = y_act + y_add
-         th_new = th_act - 60
-     
-     new_no = [x_new, y_new, th_new]
+    x_act = pos_act[0]
+    y_act = pos_act[1]
+    th_act = pos_act[2]
+    # move forward
+    if act == 1:
+        ang = th_act * pi / 180
+        x_add = L_act * cos(ang)
+        y_add = L_act * sin(ang)
+        x_new = float(x_act + x_add)
+        y_new = float(y_act + y_add)
+        th_new = th_act
+    # move counter-clockwise 30 
+    elif act == 2:
+        ang = (th_act + 30) * pi / 180
+        x_add = float(L_act * cos(ang))
+        y_add = float(L_act * sin(ang))
+        x_new = x_act + x_add
+        y_new = y_act + y_add
+        th_new = th_act + 30
+    # move counter-clockwise 60 
+    elif act == 3:
+        ang = (th_act + 60) * pi / 180
+        x_add = float(L_act * cos(ang))
+        y_add = float(L_act * sin(ang))
+        x_new = x_act + x_add
+        y_new = y_act + y_add
+        th_new = th_act + 60
+    # move clockwise 30 
+    elif act == 4:
+        ang = (th_act - 30) * pi / 180
+        x_add = float(L_act * cos(ang))
+        y_add = float(L_act * sin(ang))
+        x_new = x_act + x_add
+        y_new = y_act + y_add
+        th_new = th_act - 30
+    # move clockwise 60 
+    else:
+        ang = (th_act - 60) * pi / 180
+        x_add = float(L_act * cos(ang))
+        y_add = float(L_act * sin(ang))
+        x_new = x_act + x_add
+        y_new = y_act + y_add
+        th_new = th_act - 60
+    
+    new_no = [x_new, y_new, th_new]
 
-     return new_no 
+    return new_no 
 
      
 # This function converts the x, y, and theta list into the format needed for checking the tree (instructions: page 14, Second method) 
@@ -185,93 +185,89 @@ mat_cost = np.zeros((1207, 507, 12)) # saving the cost in a matrix
 # may want to move mat_exp earlier as we can designate obstacle space as 0
 # I think the shape of mat_exp should be 1200, 500, 12 using the thresholds from slide 14
 while not open_l.empty():
-     # pull out a node and add it to the closed list
-     x = open_l.get()
-     closed_l.put(x)
-     # pull out useful elements
-     cur_cost = x[0]
-     cur_go = x[1]
-     cur_ind = x[2]
-     cur_par = x[3]
-     cur_pos = x[4]
+    # pull out a node and add it to the closed list
+    x = open_l.get()
+    closed_l.put(x)
+    # pull out useful elements
+    cur_cost = x[0]
+    cur_go = x[1]
+    cur_ind = x[2]
+    cur_par = x[3]
+    cur_pos = x[4]
 
-     ## we should update closed record outside of the loop with node we are currently exploring
-     i_e, j_e, th_e = mat_expl(cur_pos)
-     # print(i_e, j_e, th_e) #used for a bug check
-     mat_exp_cl[i_e][j_e][th_e] = 1  # now we have explored this in the closed list
-    
-     # check if we have reached the goal
-     thresh = np.sqrt((cur_pos[0] - node_g[0])**2 + (cur_pos[1] - node_g[1])**2)
-     if thresh <= 1.5:  
-          # run the backtrack function
-          node_path = trace_back(closed_l, cur_par, cur_ind)
-          ## added to the print line below to verify that final state is correct
-          print("Success! Confirm final state:",'('+str(cur_pos[0])+', '+str(cur_pos[1])+', '+str(cur_pos[2])+')')
-          # res_g = 1
-          break
-     # perform all possible movements
-     else:
-          for i in range(0, 5):
-               new_pos = action_m(cur_pos, L, i)  # L is the user input for the step size of the robot
-               # keep theta value between 0 and 359
-               if new_pos[2]>359:
-                   new_pos[2] = new_pos[2]-360
-               elif new_pos[2]<0:
-                   new_pos[2] = new_pos[2]+360
-               # Check if the new location is in the closed list or obstacle space
-               i_e, j_e, th_e = mat_expl(new_pos)
-               check_cl = mat_exp_cl[i_e][j_e][th_e]
-               check_ol = mat_exp_ol[i_e][j_e][th_e]
-               check_ob = obs[i_e][j_e] #no theta value for obstacles ##The obstacle matrix needs to be updated to match the new resolution
-               #new_pos_round = ((i_e+1)/2, (j_e+1)/2, (th_e)*30) ##added for now, so the if statement to update open list works. Need to continue troubleshooting why that check produces error if new_pos is not rounded to the threshold grid
-               #check_ob = p2_coll(new_l)
-               # need to add lxu = cost2come + cost2go
-               cost_come = cur_go + L #.copy() is because I had a bug earlier with updating variables in a loop and using a copy fixed it
-               cost_go = 6* np.sqrt((node_g[0]-cur_pos[0])**2 + (node_g[1]-cur_pos[1])**2)
-               lxu = cost_come+cost_go
+    ## we should update closed record outside of the loop with node we are currently exploring
+    i_e, j_e, th_e = mat_expl(cur_pos)
+    # print(i_e, j_e, th_e) #used for a bug check
+    mat_exp_cl[i_e][j_e][th_e] = 1  # now we have explored this in the closed list
 
-               if check_ob == 1: #decoupled the checks into separate statements
-                    continue #we can skip all the updating code if the new node is in the obstacle space
-               elif check_cl == 0:
-                    # mat_exp_cl[i_e][j_e][th_e] = 1  # now we have explored this in the closed list
-                    if check_ol == 0:
-                        mat_exp_ol[i_e][j_e][th_e] = 1
-                        id = id + 1
-                        # lxu is cost to come plus cost to go
-                        new_node = [lxu, cost_come, id, cur_ind, new_pos]
-                        mat_cost[i_e][j_e][th_e] = lxu  #update the cost matrix
-                        open_l.put(new_node)
-                    ## below if statement moved from check_cl==1 section below, and updated for open list
-                    elif check_ol == 1:
-                        m_co = mat_cost[i_e][j_e][th_e]  # this is to get the cost of the repeat, needs to be remade
-                        #lenj = closed_l.qsize()
-                        #check_idx = [item[4] for item in open_l.queue]
-                        #idx=check_idx.index(new_pos_round) #this should eliminate need for a for loop
-                        if m_co >  lxu:
-                            # I added a for loop as I got errors from the code commented out above
-                            for j in range(0, open_l.qsize()):
-                                check_pos = open_l.queue[j][4]
-                                i_c, j_c, th_c = mat_expl(check_pos)
-                                if i_c == i_e and j_c == j_e and th_c == th_e:
-                                    idx = j
-                            rep_pos = open_l.queue[idx][4]
-                            rep_ind = open_l.queue[idx][2]
-                            rep_node = open_l.queue[idx]
-                            open_l.queue.remove(rep_node)
-                            imp_q = [lxu, cost_come, rep_ind, cur_ind, rep_pos]
-                            open_l.put(imp_q)
-                        #for j1 in range(0, lenj):
-                         #   if closed_l.queue[j1][3] == new_pos:
-                          #      m_i = closed_l.queue[j1][1]
-                           #     closed_l.queue[j1] = [cur_cost + lxu, m_i, cur_ind, new_pos]
-                            #    mat_cost[i_e][j_e][th_e] = cur_cost + lxu  # update the cost matrix
-               elif check_cl == 1:
-                   continue
+    # check if we have reached the goal
+    thresh = np.sqrt((cur_pos[0] - node_g[0])**2 + (cur_pos[1] - node_g[1])**2)
+    if thresh <= 1.5:  
+        # run the backtrack function
+        node_path = trace_back(closed_l, cur_par, cur_ind)
+        ## added to the print line below to verify that final state is correct
+        print("Success! Confirm final state:",'('+str(cur_pos[0])+', '+str(cur_pos[1])+', '+str(cur_pos[2])+')')
+        # res_g = 1
+        break
+    # perform all possible movements
+    else:
+        for i in range(0, 5):
+            new_pos = action_m(cur_pos, L, i)  # L is the user input for the step size of the robot
+            # keep theta value between 0 and 359
+            if new_pos[2]>359:
+                new_pos[2] = new_pos[2]-360
+            elif new_pos[2]<0:
+                new_pos[2] = new_pos[2]+360
+            # Check if the new location is in the closed list or obstacle space
+            i_e, j_e, th_e = mat_expl(new_pos)
+            check_cl = mat_exp_cl[i_e][j_e][th_e]
+            check_ol = mat_exp_ol[i_e][j_e][th_e]
+            check_ob = obs[i_e][j_e] #no theta value for obstacles ##The obstacle matrix needs to be updated to match the new resolution
+            #new_pos_round = ((i_e+1)/2, (j_e+1)/2, (th_e)*30) ##added for now, so the if statement to update open list works. Need to continue troubleshooting why that check produces error if new_pos is not rounded to the threshold grid
+            #check_ob = p2_coll(new_l)
+            # need to add lxu = cost2come + cost2go
+            cost_come = cur_go + L #.copy() is because I had a bug earlier with updating variables in a loop and using a copy fixed it
+            cost_go = 6* np.sqrt((node_g[0]-cur_pos[0])**2 + (node_g[1]-cur_pos[1])**2)
+            lxu = cost_come+cost_go
+
+            if check_ob == 1: #decoupled the checks into separate statements
+                continue #we can skip all the updating code if the new node is in the obstacle space
+            elif check_cl == 0:
+                # mat_exp_cl[i_e][j_e][th_e] = 1  # now we have explored this in the closed list
+                if check_ol == 0:
+                    mat_exp_ol[i_e][j_e][th_e] = 1
+                    id = id + 1
+                    # lxu is cost to come plus cost to go
+                    new_node = [lxu, cost_come, id, cur_ind, new_pos]
+                    mat_cost[i_e][j_e][th_e] = lxu  #update the cost matrix
+                    open_l.put(new_node)
+                ## below if statement moved from check_cl==1 section below, and updated for open list
+                elif check_ol == 1:
+                    m_co = mat_cost[i_e][j_e][th_e]  # this is to get the cost of the repeat, needs to be remade
+                    #lenj = closed_l.qsize()
+                    #check_idx = [item[4] for item in open_l.queue]
+                    #idx=check_idx.index(new_pos_round) #this should eliminate need for a for loop
+                    if m_co >  lxu:
+                        # I added a for loop as I got errors from the code commented out above
+                        for j in range(0, open_l.qsize()):
+                            check_pos = open_l.queue[j][4]
+                            i_c, j_c, th_c = mat_expl(check_pos)
+                            if i_c == i_e and j_c == j_e and th_c == th_e:
+                                idx = j
+                        rep_pos = open_l.queue[idx][4]
+                        rep_ind = open_l.queue[idx][2]
+                        rep_node = open_l.queue[idx]
+                        open_l.queue.remove(rep_node)
+                        imp_q = [lxu, cost_come, rep_ind, cur_ind, rep_pos]
+                        open_l.put(imp_q)
+                    #for j1 in range(0, lenj):
+                        #   if closed_l.queue[j1][3] == new_pos:
+                        #      m_i = closed_l.queue[j1][1]
+                        #     closed_l.queue[j1] = [cur_cost + lxu, m_i, cur_ind, new_pos]
+                        #    mat_cost[i_e][j_e][th_e] = cur_cost + lxu  # update the cost matrix
+            elif check_cl == 1:
+                continue
                                 
-## used to time how long code takes to execute
-end_time = time.time()
-print('Total time (s):', end_time-start_time)
-
 # get points in the obstacle space
 x_obs = []
 y_obs = []
@@ -350,3 +346,7 @@ def animate(fr):
 anim = animation.FuncAnimation(fig, animate,frames=(len_cl + len_pa), interval=1)
 
 plt.show()
+
+## used to time how long code takes to execute
+end_time = time.time()
+print('Total time (s):', end_time-start_time)

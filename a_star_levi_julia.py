@@ -158,17 +158,13 @@ while 1:
         print('Input must be a number between 1 and 10. Try again...')
 
 
-# I used Priority queue (I am surpised you did not use that or heap)
-# I will remove the comments above when I do a comment sweep for cleanliness
 # Initialize priority q
 open_l = PriorityQueue()
 closed_l = PriorityQueue()
-#q3 = PriorityQueue()  # this is just for the while loop
-#uu = q3.empty()
 
 # Create the first element in the list
-#node_i = []  # This needs to be changed to the customer input #done
 cost_go = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
+# Determine number of points per frame and the weighting of the cost to go
 if cost_go < 250:
     c_w = 1.5
     v_w = 200
@@ -181,16 +177,13 @@ else:
 # [Total cost, cost to go, index, parent, [x, y, theta]] #will be easier to compute below if we track cost to go for each node
 el1 = [0, 0, 0, 0, node_i]
 open_l.put(el1) # starting the open list
-# check if the initial node or goal nodes are in obstacle space
 
 # Starting the search
 res_g = 0  # becomes 1 or something else when we reach the goal
-id = el1[1]
+id = el1[1]  # index of new nodes
 mat_exp_ol = np.zeros((1207, 507, 12))  # empty matrix to record where we have explored in the open list
 mat_exp_cl = np.zeros((1207, 507, 12))  # empty matrix to record where we have explored in the closed list
 mat_cost = np.zeros((1207, 507, 12)) # saving the cost in a matrix
-# may want to move mat_exp earlier as we can designate obstacle space as 0
-# I think the shape of mat_exp should be 1200, 500, 12 using the thresholds from slide 14
 while not open_l.empty():
     # pull out a node and add it to the closed list
     x = open_l.get()
@@ -318,18 +311,14 @@ while not open_l.empty():
             i_e, j_e, th_e = mat_expl(new_pos)
             check_cl = mat_exp_cl[i_e][j_e][th_e]
             check_ol = mat_exp_ol[i_e][j_e][th_e]
-            check_ob = obs[i_e][j_e] #no theta value for obstacles ##The obstacle matrix needs to be updated to match the new resolution
-            #new_pos_round = ((i_e+1)/2, (j_e+1)/2, (th_e)*30) ##added for now, so the if statement to update open list works. Need to continue troubleshooting why that check produces error if new_pos is not rounded to the threshold grid
-            #check_ob = p2_coll(new_l)
-            # need to add lxu = cost2come + cost2go
+            check_ob = obs[i_e][j_e] #no theta value for obstacles
             cost_come = cur_go + L #.copy() is because I had a bug earlier with updating variables in a loop and using a copy fixed it
-            cost_go = c_w * np.sqrt((node_g[0]-cur_pos[0])**2 + (node_g[1]-cur_pos[1])**2)
-            lxu = cost_come+cost_go
+            cost_go = c_w * np.sqrt((node_g[0]-cur_pos[0])**2 + (node_g[1]-cur_pos[1])**2)  # weighted cost to go
+            lxu = cost_come+cost_go  # combined cost
 
             if check_ob == 1: #decoupled the checks into separate statements
                 continue #we can skip all the updating code if the new node is in the obstacle space
             elif check_cl == 0:
-                # mat_exp_cl[i_e][j_e][th_e] = 1  # now we have explored this in the closed list
                 if check_ol == 0:
                     mat_exp_ol[i_e][j_e][th_e] = 1
                     id = id + 1
@@ -356,11 +345,6 @@ while not open_l.empty():
                         open_l.queue.remove(rep_node)
                         imp_q = [lxu, cost_come, rep_ind, cur_ind, rep_pos]
                         open_l.put(imp_q)
-                    #for j1 in range(0, lenj):
-                        #   if closed_l.queue[j1][3] == new_pos:
-                        #      m_i = closed_l.queue[j1][1]
-                        #     closed_l.queue[j1] = [cur_cost + lxu, m_i, cur_ind, new_pos]
-                        #    mat_cost[i_e][j_e][th_e] = cur_cost + lxu  # update the cost matrix
             elif check_cl == 1:
                 continue
                                 
@@ -391,18 +375,6 @@ y_exp1 = reverse_list(y_exp1)
 xth_exp1 = reverse_list(xth_exp1)
 yth_exp1 = reverse_list(yth_exp1)
 
-# save the open explored points
-#plt2_size = open_l.qsize()
-#x_exp2 = []
-#y_exp2 = []
-#xth_exp2 = []
-#yth_exp2 = []
-#for i2_plot in range(0, plt2_size):
-#    x_exp2.append(open_l.queue[i2_plot][4][0])
-#    y_exp2.append(open_l.queue[i2_plot][4][1])
-#    xth_exp2.append(float(L * cos(open_l.queue[i2_plot][4][2] * pi / 180)))
-#    yth_exp2.append(float(L * sin(open_l.queue[i2_plot][4][2] * pi / 180)))
-
 # record the path
 len_pa = len(node_path)
 x_pa = []
@@ -429,7 +401,7 @@ plt.ylim((0, 250))
 len_cl = len(x_exp1)
 len_pa = len(x_pa)
 def animate(fr):
-    i_a = fr * v_w
+    i_a = fr * v_w # range of points displayed in each frame
     if i_a < len_cl:
         ax.quiver(x_exp1[0:i_a], y_exp1[0:i_a], xth_exp1[0:i_a], yth_exp1[0:i_a], color="red", angles='xy', scale_units='xy', scale=1, width=0.005)
     elif i_a < (len_cl + len_pa):

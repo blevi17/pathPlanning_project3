@@ -101,8 +101,6 @@ def trace_back(q_cl, par, cur_ind):
 
     return trace_res
 
-# This file is designed to check/fix the final orientation
-  
 ############################################ Main code ###############################################
 
 ### I got it to run without errors but I think it is getting stuck in a loop without finding the goal node and I'm stuck trying to figure out where/why
@@ -202,13 +200,98 @@ while not open_l.empty():
 
     # check if we have reached the goal
     thresh = np.sqrt((cur_pos[0] - node_g[0])**2 + (cur_pos[1] - node_g[1])**2)
-    if thresh <= 1.5:  
-        # run the backtrack function
-        node_path = trace_back(closed_l, cur_par, cur_ind)
-        ## added to the print line below to verify that final state is correct
-        print("Success! Confirm final state:",'('+str(cur_pos[0])+', '+str(cur_pos[1])+', '+str(cur_pos[2])+')')
-        # res_g = 1
-        break
+    if thresh <= 1.5:
+        if cur_pos[2] == node_g[2]:  
+            # run the backtrack function
+            node_path = trace_back(closed_l, cur_par, cur_ind)
+            ## added to the print line below to verify that final state is correct
+            print("Success! Confirm final state:",'('+str(cur_pos[0])+', '+str(cur_pos[1])+', '+str(cur_pos[2])+')')
+            break
+        else:
+            while cur_pos[2] == node_g[2]:
+                if ((cur_pos[2] - node_g[2])**2 % 3600) == 0:
+                    first_act = 4
+                else:
+                    first_act = 2
+                # Move forward once or 30 degrees
+                m1 = action_m(cur_pos, L, 4)
+                i_e, j_e, th_e = mat_expl(m1)
+                check_ob = obs[i_e][j_e]
+                if check_ob == 0:
+                    id = id + 1
+                    m_add = [0, 0, id, cur_par, m1]
+                    closed_l.put(m_add)
+                else:
+                    print("Near Success (not enough room to correct orientation)! Confirm final state:",'('+str(cur_pos[0])+', '+str(cur_pos[1])+', '+str(cur_pos[2])+')')
+                    break
+                # Move 60 degrees to the right 5 times
+                # First turn
+                m2 = action_m(m1, L, 5)
+                i_e, j_e, th_e = mat_expl(m2)
+                check_ob = obs[i_e][j_e]
+                if check_ob == 0:
+                    id = id + 1
+                    m_add = [0, 0, id, id - 1, m2]
+                    closed_l.put(m_add)
+                else:
+                    print("Near Success (not enough room to correct orientation)! Confirm final state:",'('+str(cur_pos[0])+', '+str(cur_pos[1])+', '+str(cur_pos[2])+')')
+                    break
+                # Second turn
+                m3 = action_m(m2, L, 5)
+                i_e, j_e, th_e = mat_expl(m3)
+                check_ob = obs[i_e][j_e]
+                if check_ob == 0:
+                    id = id + 1
+                    m_add = [0, 0, id, id - 1, m3]
+                    closed_l.put(m_add)
+                else:
+                    print("Near Success (not enough room to correct orientation)! Confirm final state:",'('+str(cur_pos[0])+', '+str(cur_pos[1])+', '+str(cur_pos[2])+')')
+                    break
+                # Third turn
+                m4 = action_m(m3, L, 5)
+                i_e, j_e, th_e = mat_expl(m4)
+                check_ob = obs[i_e][j_e]
+                if check_ob == 0:
+                    id = id + 1
+                    m_add = [0, 0, id, id - 1, m4]
+                    closed_l.put(m_add)
+                else:
+                    print("Near Success (not enough room to correct orientation)! Confirm final state:",'('+str(cur_pos[0])+', '+str(cur_pos[1])+', '+str(cur_pos[2])+')')
+                    break
+                # Fourth turn
+                m5 = action_m(m4, L, 5)
+                i_e, j_e, th_e = mat_expl(m5)
+                check_ob = obs[i_e][j_e]
+                if check_ob == 0:
+                    id = id + 1
+                    m_add = [0, 0, id, id - 1, m5]
+                    closed_l.put(m_add)
+                else:
+                    print("Near Success (not enough room to correct orientation)! Confirm final state:",'('+str(cur_pos[0])+', '+str(cur_pos[1])+', '+str(cur_pos[2])+')')
+                    break
+                # Fifth turn
+                m6 = action_m(m5, L, 5)
+                i_e, j_e, th_e = mat_expl(m6)
+                check_ob = obs[i_e][j_e]
+                if check_ob == 0:
+                    id = id + 1
+                    m_add = [0, 0, id, id - 1, m6]
+                    closed_l.put(m_add)
+                else:
+                    print("Near Success (not enough room to correct orientation)! Confirm final state:",'('+str(cur_pos[0])+', '+str(cur_pos[1])+', '+str(cur_pos[2])+')')
+                    break
+                # Fix the angle after returning to the goal location
+                if m6[2] > 359:
+                    m6[2] = m6[2] - 360
+                elif [2] < 0:
+                    m6[2] = m6[2] + 360
+                # update useful elements
+                cur_cost = x[0] + 6 * L
+                #cur_go = x[1]
+                cur_ind = id
+                cur_par = id - 1
+                cur_pos = m6
+                
     # perform all possible movements
     else:
         for i in range(0, 5):
@@ -227,7 +310,7 @@ while not open_l.empty():
             #check_ob = p2_coll(new_l)
             # need to add lxu = cost2come + cost2go
             cost_come = cur_go + L #.copy() is because I had a bug earlier with updating variables in a loop and using a copy fixed it
-            cost_go = 6* np.sqrt((node_g[0]-cur_pos[0])**2 + (node_g[1]-cur_pos[1])**2)
+            cost_go = np.sqrt((node_g[0]-cur_pos[0])**2 + (node_g[1]-cur_pos[1])**2)
             lxu = cost_come+cost_go
 
             if check_ob == 1: #decoupled the checks into separate statements

@@ -100,6 +100,8 @@ def trace_back(q_cl, par, cur_ind):
     trace_res = reverse_list(path)
 
     return trace_res
+
+# This file is designed to check/fix the final orientation
   
 ############################################ Main code ###############################################
 
@@ -225,7 +227,7 @@ while not open_l.empty():
                #check_ob = p2_coll(new_l)
                # need to add lxu = cost2come + cost2go
                cost_come = cur_go + L #.copy() is because I had a bug earlier with updating variables in a loop and using a copy fixed it
-               cost_go = np.sqrt((node_g[0]-cur_pos[0])**2 + (node_g[1]-cur_pos[1])**2)
+               cost_go = 6* np.sqrt((node_g[0]-cur_pos[0])**2 + (node_g[1]-cur_pos[1])**2)
                lxu = cost_come+cost_go
 
                if check_ob == 1: #decoupled the checks into separate statements
@@ -310,7 +312,6 @@ yth_exp1 = reverse_list(yth_exp1)
 #    yth_exp2.append(float(L * sin(open_l.queue[i2_plot][4][2] * pi / 180)))
 
 # record the path
-print(node_path)
 len_pa = len(node_path)
 x_pa = []
 y_pa = []
@@ -336,12 +337,15 @@ plt.ylim((0, 250))
 len_cl = len(x_exp1)
 len_pa = len(x_pa)
 def animate(fr):
-    i_a = fr *20
+    i_a = fr * 20
     if i_a < len_cl:
         ax.quiver(x_exp1[0:i_a], y_exp1[0:i_a], xth_exp1[0:i_a], yth_exp1[0:i_a], color="red", angles='xy', scale_units='xy', scale=1, width=0.005)
-    else:
+    elif i_a < (len_cl + len_pa):
         i_b = i_a - len_cl
         ax.quiver(x_pa[0:i_b], y_pa[0:i_b], xth_pa[0:i_b], yth_pa[0:i_b], color="blue", angles='xy', scale_units='xy', scale=1, width=0.005)
+    else:
+        i_c = len_cl + len_pa
+        ax.quiver(x_pa[0:i_c], y_pa[0:i_c], xth_pa[0:i_c], yth_pa[0:i_c], color="blue", angles='xy', scale_units='xy', scale=1, width=0.005)
 
 anim = animation.FuncAnimation(fig, animate,frames=(len_cl + len_pa), interval=1)
 

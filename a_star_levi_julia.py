@@ -169,6 +169,16 @@ closed_l = PriorityQueue()
 # Create the first element in the list
 #node_i = []  # This needs to be changed to the customer input #done
 cost_go = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
+if cost_go < 250:
+    c_w = 2
+    v_w = 300
+elif cost_go < 375:
+    c_w = 2
+    v_w = 350
+else:
+    c_w = 3.75
+    v_w = 550
+print(cost_go)
 # [Total cost, cost to go, index, parent, [x, y, theta]] #will be easier to compute below if we track cost to go for each node
 el1 = [0, 0, 0, 0, node_i]
 open_l.put(el1) # starting the open list
@@ -314,7 +324,7 @@ while not open_l.empty():
             #check_ob = p2_coll(new_l)
             # need to add lxu = cost2come + cost2go
             cost_come = cur_go + L #.copy() is because I had a bug earlier with updating variables in a loop and using a copy fixed it
-            cost_go = 3.75 * np.sqrt((node_g[0]-cur_pos[0])**2 + (node_g[1]-cur_pos[1])**2)
+            cost_go = c_w * np.sqrt((node_g[0]-cur_pos[0])**2 + (node_g[1]-cur_pos[1])**2)
             lxu = cost_come+cost_go
 
             if check_ob == 1: #decoupled the checks into separate statements
@@ -420,15 +430,15 @@ plt.ylim((0, 250))
 len_cl = len(x_exp1)
 len_pa = len(x_pa)
 def animate(fr):
-    i_a = fr * 500
+    i_a = fr * v_w
     if i_a < len_cl:
         ax.quiver(x_exp1[0:i_a], y_exp1[0:i_a], xth_exp1[0:i_a], yth_exp1[0:i_a], color="red", angles='xy', scale_units='xy', scale=1, width=0.005)
     elif i_a < (len_cl + len_pa):
         i_b = i_a - len_cl
-        ax.quiver(x_pa[0:i_b], y_pa[0:i_b], xth_pa[0:i_b], yth_pa[0:i_b], color="blue", angles='xy', scale_units='xy', scale=1, width=0.005)
+        ax.quiver(x_pa[0:i_b], y_pa[0:i_b], xth_pa[0:i_b], yth_pa[0:i_b], color="green", angles='xy', scale_units='xy', scale=1, width=0.005)
     else:
         i_c = len_cl + len_pa
-        ax.quiver(x_pa[0:i_c], y_pa[0:i_c], xth_pa[0:i_c], yth_pa[0:i_c], color="blue", angles='xy', scale_units='xy', scale=1, width=0.005)
+        ax.quiver(x_pa[0:i_c], y_pa[0:i_c], xth_pa[0:i_c], yth_pa[0:i_c], color="green", angles='xy', scale_units='xy', scale=1, width=0.005)
 
 anim = animation.FuncAnimation(fig, animate,frames=(len_cl + len_pa), interval=1)
 

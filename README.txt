@@ -3,7 +3,7 @@ This is the Path Planning Project 3 Github Repository of Levi Butler and Julia M
 https://github.com/blevi17/pathPlanning_project3
 
 Team member names and IDs:
-    Levi Butler (lbutle11, *insert UID*)
+    Levi Butler (lbutle11, 119444733)
     Julia Kim (jkim603, 119451717)
 
 Libraries/dependencies:

@@ -31,23 +31,42 @@ v_mt = 220  # maximum translational velocity in mm/s according to the spec sheet
 # Taking in user input
 while 1:
     try:
-        C = float(input("Clearance:"))
+        c = float(input("Clearance:"))
         if L>190 or L<0:
             print('Clearance is too large to guarantee the goal is reachabel! Try Again...')
         else:
             break
     except:
         print('Input must be a number between 0 and 190. Try again...')
+
+# Check the obstacle space
+# I want to make the bottom left corner the obstacle space of the matrix we are checking
+obs = np.zeros(6000, 2000)  # might have to change this depending on step sizes
+for i in range(6000):
+    # print('i',i)
+    for j in range(2000):
+        # print('j',j)
+        if j<=(1250 + r + c) and (2395 - r - c)<=i<=(2650 + r + c): #bottom rectangle definition w/ robot radius and clearance
+            obs[i,j]=1
+        elif j>=(750 - r - c) and (1395 - r - c)<=i<=(1650 + r + c): #top rectangle definition w/ robot radius and clearance
+            obs[i,j]=1
+        elif (i - 4000)**2 + (j - 1000)**2 <= (500 + r + c)**2: #circle definition w/ margin
+            obs[i,j]=1
+        elif i<=(r+c) or i>=(6000 - r - c):  #vertical wall definition
+            obs[i,j]=1
+        elif i<=(r+c) or i>=(4000 - r - c):  #horizontal wall definition
+            obs[i,j]=1
+
 while 1:
     try:
         start_input = input("Start State:")
         node_i = input2node(start_input)
-        if obs[int(2*node_i[0]),int(2*node_i[1])]==1:
+        if obs[int(node_i[0] + 500),int(2*node_i[1] + 1000)]==1:
             print('Start State inside an obstacle. Try again...')
         else:
             break
     except:
-        print('Input must be three integers separated by a comma and space (ex: 10, 10, 30). Acceptable range for first value: 1 to 600. Acceptable range for second value: 1 to 250. Acceptable range for third value: 0 to 359. Try again...')
+        print('Input must be three integers separated by a comma and space (ex: 10, 10, 30). Acceptable range for first value: -499 to 5500. Acceptable range for second value: -999 to 1000. Acceptable range for third value: 0 to 359. Try again...')
 while 1:
     try:
         goal_input = input("Goal State:")
@@ -57,7 +76,7 @@ while 1:
         else:
             break
     except:
-        print('Input must be two integers separated by a comma and space (ex: 10, 10). Acceptable range for first value: 1 to 600. Acceptable range for second value: 1 to 250. Try again...')
+        print('Input must be two integers separated by a comma and space (ex: 10, 10). Acceptable range for first value: -499 to 5500. Acceptable range for second value: -999 to 1000. Try again...')
 while 1:
     try:
         wheel_rpm = input("Wheel RPMs:")

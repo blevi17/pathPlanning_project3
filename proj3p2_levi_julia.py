@@ -101,7 +101,7 @@ while 1:
     try:
         goal_input = input("Goal State:")
         node_g = input2node(goal_input)
-        if obs[int(2*node_g[0]),int(2*node_g[1])]==1:
+        if obs[int(node_g[0]+500),int(node_g[1]+1000)]==1:
             print('Goal State inside an obstacle. Try again...')
         else:
             break
@@ -109,8 +109,8 @@ while 1:
         print('Input must be two integers separated by a comma and space (ex: 10, 10). Acceptable range for first value: -499 to 5500. Acceptable range for second value: -999 to 1000. Try again...')
 while 1:
     try:
-        wheel_rpm = input("Wheel RPMs:")
-        print(wheel_rpm)
+        w_rpm = input("Wheel RPMs:")
+        wheel_rpm = input2node(w_rpm)
         if 0 < wheel_rpm[0] < v_mrev and 0 < wheel_rpm[1] < v_mrev:
             print('Inputs accepted! Calculating...')
             break

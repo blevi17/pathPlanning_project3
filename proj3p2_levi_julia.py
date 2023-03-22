@@ -1,4 +1,5 @@
 # This is the main python file for Path Planning Project 3 Phase 2
+# It says to use the map from phase 1, but the turtlebot won't fit in that 
 # by Levi Butler and Julia Macon Kim
 # GitHub repository: https://github.com/blevi17/pathPlanning_project3
 
@@ -12,14 +13,6 @@ import time
 ## used to time how long code takes to execute
 start_time = time.time()
 
-################################## Functions ###############################################
-# define function to convert user input into node format
-def input2node(input):
-    output = []
-    for num in input.split(', '):
-        output.append(float(num))
-    return output
-
 # Variables from the datasheet of the turtlebot
 R = 66  # wheel radius in mm
 r = 105 # necessary buffer around the robot in mm
@@ -28,6 +21,22 @@ v_mr = 2.84  # maximum rotational velocity in rad/s
 v_mrev = float(v_mr * 60 / (2 * pi))  # maximum rotational velocity in revolutions/minute
 v_mt = 220  # maximum translational velocity in mm/s according to the spec sheet
 
+################################## Functions ###############################################
+# define function to convert user input into node format
+def input2node(input):
+    output = []
+    for num in input.split(', '):
+        output.append(float(num))
+    return output
+
+def move_step(u_l, u_r, dt, theta):
+    dx = float((r/2) * (u_l + u_r) * cos(theta) * dt)
+    dy = float((r/2) * (u_l + u_r) * sin(theta) * dt)
+    dth = float((r/L) * (u_r + u_l) * dt)
+
+    return dx, dy, dth
+
+################################### Main Code #############################################
 # Taking in user input
 while 1:
     try:
@@ -88,6 +97,11 @@ while 1:
             print('Input must be two integers separated by a comma and space (ex: 10, 10). Acceptable range for wheel rpms is 0 to 27.12 rpm, non-inclusive.Try again...')
     except:
         print('Input must be two integers separated by a comma and space (ex: 10, 10). Acceptable range for wheel rpms is 0 to 27.12 rpm, non-inclusive.Try again...')
+
+# Action Set
+rpm1 = wheel_rpm[0]
+rpm2 = wheel_rpm[1]
+act = [[0, rpm1], [rpm1, 0], [rpm1, rpm1], [0, rpm2], [rpm2, 0], [rpm2, rpm2], [rpm1, rpm2], [rpm2, rpm1]]
 
 ## used to time how long code takes to execute
 end_time = time.time()

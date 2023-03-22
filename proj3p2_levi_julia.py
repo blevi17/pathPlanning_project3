@@ -71,7 +71,7 @@ while 1:
 
 # Check the obstacle space
 # I want to make the bottom left corner the obstacle space of the matrix we are checking
-obs = np.zeros(6000, 2000)  # might have to change this depending on step sizes
+obs = np.zeros((6000, 2000))  # might have to change this depending on step sizes
 for i in range(6000):
     # print('i',i)
     for j in range(2000):
@@ -110,6 +110,7 @@ while 1:
 while 1:
     try:
         wheel_rpm = input("Wheel RPMs:")
+        print(wheel_rpm)
         if 0 < wheel_rpm[0] < v_mrev and 0 < wheel_rpm[1] < v_mrev:
             print('Inputs accepted! Calculating...')
             break

@@ -36,6 +36,26 @@ def move_step(u_l, u_r, dt, theta):
 
     return dx, dy, dth
 
+# This reverses a list
+def reverse_list(listio):
+    new_list = []
+    for i_l in range(1, len(listio) + 1):
+        new_list.append(listio[-1*i_l])
+    return new_list
+
+# This searches through a queue, finding the parents of indexes until it reaches the initial node
+def trace_back(q_cl, par, cur_ind):
+    path = [cur_ind, par]
+    while par != 0:
+        len = q_cl.qsize()
+        for it in range(0, len):
+            if q_cl.queue[it][2] == par:
+                path.append(q_cl.queue[it][3])
+                par = q_cl.queue[it][3]
+    trace_res = reverse_list(path)
+
+    return trace_res
+
 ################################### Main Code #############################################
 # Taking in user input
 while 1:
@@ -102,6 +122,52 @@ while 1:
 rpm1 = wheel_rpm[0]
 rpm2 = wheel_rpm[1]
 act = [[0, rpm1], [rpm1, 0], [rpm1, rpm1], [0, rpm2], [rpm2, 0], [rpm2, rpm2], [rpm1, rpm2], [rpm2, rpm1]]
+
+# Initialize priority q
+open_l = PriorityQueue()
+closed_l = PriorityQueue()
+
+# Create the first element in the list
+cost_go = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
+# Determine number of points per frame and the weighting of the cost to go
+if cost_go < 250:
+    c_w = 1.5
+    v_w = 200
+elif cost_go < 375:
+    c_w = 1.5
+    v_w = 250
+else:
+    c_w = 3.75
+    v_w = 550
+# [Total cost, cost to go (not based on goal location), index, parent, [x, y, theta]] #will be easier to compute below if we track cost to go for each node
+el1 = [0, 0, 0, 0, node_i]
+open_l.put(el1) # starting the open list
+
+# Starting the search
+id = el1[1]  # index of new nodes
+mat_exp_ol = np.zeros((6007, 407))  # empty matrix to record where we have explored in the open list (we don't care about angle at the goal)
+mat_exp_cl = np.zeros((6007, 407))  # empty matrix to record where we have explored in the closed list
+mat_cost = np.zeros((6007, 407)) # saving the cost in a matrix
+while not open_l.empty():
+    # pull out a node and add it to the closed list
+    x = open_l.get()
+    closed_l.put(x)
+    # pull out useful elements
+    cur_cost = x[0]
+    cur_go = x[1]
+    cur_ind = x[2]
+    cur_par = x[3]
+    cur_pos = x[4]
+
+    mat_exp_cl[x[0] - 1][x[1] - 1] = 1  # now we have explored this in the closed list
+    # check if we have reached the goal
+    thresh = np.sqrt((cur_pos[0] - node_g[0])**2 + (cur_pos[1] - node_g[1])**2)
+    if thresh <= 1.5:
+        # run the backtrack function
+        node_path = trace_back(closed_l, cur_par, cur_ind)
+        ## added to the print line below to verify that final state is correct
+        print("Success! Confirm final state:",'('+str(cur_pos[0])+', '+str(cur_pos[1])+', '+str(cur_pos[2])+')')
+        break
 
 ## used to time how long code takes to execute
 end_time = time.time()

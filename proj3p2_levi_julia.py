@@ -185,14 +185,44 @@ while not open_l.empty():
             elif new_pos[2]<0:
                 new_pos[2] = new_pos[2]+360
             # Check if the new location is in the closed list or obstacle space
-            check_cl = mat_exp_cl[new_pos[0]][new_pos[1]]
-            check_ol = mat_exp_ol[new_pos[0]][new_pos[1]]
-            check_ob = obs[new_pos[0]][new_pos[1]] #no theta value for obstacles
+            check_cl = mat_exp_cl[new_pos[0]+500][new_pos[1]+1000]
+            check_ol = mat_exp_ol[new_pos[0]+500][new_pos[1]+1000]
+            check_ob = obs[new_pos[0]+500][new_pos[1]+1000] #no theta value for obstacles
             cg = float(np.sqrt(dx**2 + dy**2))
             cost_come = cur_go + cg
             cost_go = c_w * np.sqrt((node_g[0]-new_pos[0])**2 + (node_g[1]-new_pos[1])**2)  # weighted cost to go
             lxu = cost_come+cost_go  # combined cost
 
+            if check_ob == 1: #decoupled the checks into separate statements
+                continue #we can skip all the updating code if the new node is in the obstacle space
+            elif check_cl == 0:
+                if check_ol == 0:
+                    mat_exp_ol[new_pos[0]+500][new_pos[1]+1000] = 1
+                    id = id + 1
+                    # lxu is cost to come plus cost to go
+                    new_node = [lxu, cost_come, id, cur_ind, new_pos]
+                    mat_cost[new_pos[0]+500][new_pos[1]+1000] = lxu  #update the cost matrix
+                    open_l.put(new_node)
+                # Finding a repeat in the open loop
+                elif check_ol == 1:
+                    m_co = mat_cost[new_pos[0]+500][new_pos[1]+1000]
+                    # If the cost of the old node is larger
+                    if m_co >  lxu:
+                        for j in range(0, open_l.qsize()):
+                            check_pos = open_l.queue[j][4]
+                            i_c = check_pos[0]
+                            j_c = check_pos[1]
+                            if i_c == (new_pos[0]+500) and j_c == (new_pos[1]+1000):
+                                idx = j
+                        rep_pos = open_l.queue[idx][4]
+                        rep_ind = open_l.queue[idx][2]
+                        rep_node = open_l.queue[idx]
+                        open_l.queue.remove(rep_node)
+                        imp_q = [lxu, cost_come, rep_ind, cur_ind, rep_pos]
+                        open_l.put(imp_q)
+            elif check_cl == 1:
+                continue
+            
 ## used to time how long code takes to execute
 end_time = time.time()
 print('Total time (s):', end_time-start_time)

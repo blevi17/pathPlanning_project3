@@ -20,6 +20,7 @@ L = 160  # wheel center to center distance in mm
 v_mr = 2.84  # maximum rotational velocity in rad/s
 v_mrev = float(v_mr * 60 / (2 * pi))  # maximum rotational velocity in revolutions/minute
 v_mt = 220  # maximum translational velocity in mm/s according to the spec sheet
+dt = 0.2  # Time step that we get to define  ###############################################################################
 
 ################################## Functions ###############################################
 # define function to convert user input into node format
@@ -29,12 +30,12 @@ def input2node(input):
         output.append(float(num))
     return output
 
-def move_step(u_l, u_r, dt, theta):
-    dx = float((r/2) * (u_l + u_r) * cos(theta) * dt)
-    dy = float((r/2) * (u_l + u_r) * sin(theta) * dt)
-    dth = float((r/L) * (u_r + u_l) * dt)
+def move_step(u_l, u_r, theta):
+    dx1 = float((r/2) * (u_l + u_r) * cos(theta) * dt)
+    dy1 = float((r/2) * (u_l + u_r) * sin(theta) * dt)
+    dth1 = float((r/L) * (u_r + u_l) * dt)
 
-    return dx, dy, dth
+    return dx1, dy1, dth1
 
 # This reverses a list
 def reverse_list(listio):
@@ -168,6 +169,29 @@ while not open_l.empty():
         ## added to the print line below to verify that final state is correct
         print("Success! Confirm final state:",'('+str(cur_pos[0])+', '+str(cur_pos[1])+', '+str(cur_pos[2])+')')
         break
+    
+    else:
+        for i in range(0,8):
+            rpm = act(i)
+            # no slip condition
+            ul = float(rpm[0] * 2 * pi * R)
+            ur = float(rpm[1] * 2 * pi * R)
+            dx, dy, dth = move_step(ul, ur, cur_pos[2])
+            new_pos = [cur_pos[0] + dx, cur_pos[1] + dy, cur_pos[2] + dth]
+
+            # keep theta value between 0 and 359
+            if new_pos[2]>359:
+                new_pos[2] = new_pos[2]-360
+            elif new_pos[2]<0:
+                new_pos[2] = new_pos[2]+360
+            # Check if the new location is in the closed list or obstacle space
+            check_cl = mat_exp_cl[new_pos[0]][new_pos[1]]
+            check_ol = mat_exp_ol[new_pos[0]][new_pos[1]]
+            check_ob = obs[new_pos[0]][new_pos[1]] #no theta value for obstacles
+            cg = float(np.sqrt(dx**2 + dy**2))
+            cost_come = cur_go + cg
+            cost_go = c_w * np.sqrt((node_g[0]-new_pos[0])**2 + (node_g[1]-new_pos[1])**2)  # weighted cost to go
+            lxu = cost_come+cost_go  # combined cost
 
 ## used to time how long code takes to execute
 end_time = time.time()

@@ -80,11 +80,11 @@ for i in range(6000):
             obs[i,j]=1
         elif j>=(750 - r - c) and (1395 - r - c)<=i<=(1650 + r + c): #top rectangle definition w/ robot radius and clearance
             obs[i,j]=1
-        elif (i - 4000)**2 + (j - 1000)**2 <= (500 + r + c)**2: #circle definition w/ margin
+        elif (i - 4000)**2 + (j - 1100)**2 <= (500 + r + c)**2: #circle definition w/ margin
             obs[i,j]=1
         elif i<=(r+c) or i>=(6000 - r - c):  #vertical wall definition
             obs[i,j]=1
-        elif i<=(r+c) or i>=(4000 - r - c):  #horizontal wall definition
+        elif j<=(r+c) or j>=(2000 - r - c):  #horizontal wall definition
             obs[i,j]=1
 
 while 1:
@@ -141,8 +141,8 @@ elif cost_go < 375:
 else:
     c_w = 3.75
     v_w = 550
-# [Total cost, cost to go (not based on goal location), index, parent, [x, y, theta]] #will be easier to compute below if we track cost to go for each node
-el1 = [0, 0, 0, 0, node_i]
+# [Total cost, cost to go (not based on goal location), index, parent, [x, y, theta], ditance traveled to reach the point] #will be easier to compute below if we track cost to go for each node
+el1 = [0, 0, 0, 0, node_i, 0]
 open_l.put(el1) # starting the open list
 
 # Starting the search
@@ -178,8 +178,8 @@ while not open_l.empty():
             ul = float(rpm[0] * pi / 30)
             ur = float(rpm[1] * pi / 30)
             dx, dy, dth = move_step(ul, ur, cur_pos[2])
+            L = float(np.sqrt(dx**2 + dy**2))
             new_pos = [cur_pos[0] + dx, cur_pos[1] + dy, cur_pos[2] + dth]
-            print(new_pos)
 
             # keep theta value between 0 and 359
             if new_pos[2]>359:
@@ -202,7 +202,7 @@ while not open_l.empty():
                     mat_exp_ol[round(new_pos[0])+500][round(new_pos[1])+1000] = 1
                     id = id + 1
                     # lxu is cost to come plus cost to go
-                    new_node = [lxu, cost_come, id, cur_ind, new_pos]
+                    new_node = [lxu, cost_come, id, cur_ind, new_pos, L]
                     mat_cost[round(new_pos[0])+500][round(new_pos[1])+1000] = lxu  #update the cost matrix
                     open_l.put(new_node)
                 # Finding a repeat in the open loop
@@ -220,11 +220,77 @@ while not open_l.empty():
                                 rep_ind = open_l.queue[idx][2]
                                 rep_node = open_l.queue[idx]
                                 open_l.queue.remove(rep_node)
-                                imp_q = [lxu, cost_come, rep_ind, cur_ind, rep_pos]
+                                imp_q = [lxu, cost_come, rep_ind, cur_ind, rep_pos, L]
                                 open_l.put(imp_q)
             elif check_cl == 1:
                 continue
-            
+
+# get points in the obstacle space
+x_obs = []
+y_obs = []
+for i in range(0, 6000, 4):
+    for j in range(0, 2000, 4):
+        if obs[i, j] == 1:
+            x_obs.append(i)
+            y_obs.append(j)
+
+# save closed explored x and y points
+plt1_size = closed_l.qsize()
+x_exp1 = []
+y_exp1 = []
+xth_exp1 = []
+yth_exp1 = []
+for i1_plot in range(0, plt1_size):
+    L = closed_l.queue[i1_plot][5]
+    x_exp1.append(closed_l.queue[i1_plot][4][0])
+    y_exp1.append(closed_l.queue[i1_plot][4][1])
+    xth_exp1.append(float(L * cos(closed_l.queue[i1_plot][4][2] * pi / 180)))
+    yth_exp1.append(float(L * sin(closed_l.queue[i1_plot][4][2] * pi / 180)))
+x_exp1 = reverse_list(x_exp1)
+y_exp1 = reverse_list(y_exp1)
+xth_exp1 = reverse_list(xth_exp1)
+yth_exp1 = reverse_list(yth_exp1)
+
+# record the path
+len_pa = len(node_path)
+x_pa = []
+y_pa = []
+xth_pa = []
+yth_pa = []
+for i_pa in range(0, len_pa):
+    ind_pa = node_path[i_pa]
+    for j_pa in range(0, plt1_size):
+        if closed_l.queue[j_pa][2] == ind_pa:
+            L = closed_l.queue[j_pa][5]
+            x_pa.append(closed_l.queue[j_pa][4][0])
+            y_pa.append(closed_l.queue[j_pa][4][1])
+            xth_pa.append(float(L * cos(closed_l.queue[j_pa][4][2] * pi / 180)))
+            yth_pa.append(float(L * sin(closed_l.queue[j_pa][4][2] * pi / 180)))
+
+#plotting the obstacle space
+fig, ax = plt.subplots(figsize=(12, 7))
+plt.plot(x_obs, y_obs, 'b.', markersize=1)
+plt.xlim((0, 6000))
+plt.ylim((0, 2000))
+
+# plot all of the explored points in a test
+len_cl = len(x_exp1)
+len_pa = len(x_pa)
+def animate(fr):
+    i_a = fr * v_w # range of points displayed in each frame
+    if i_a < len_cl:
+        ax.quiver(x_exp1[0:i_a], y_exp1[0:i_a], xth_exp1[0:i_a], yth_exp1[0:i_a], color="red", angles='xy', scale_units='xy', scale=1, width=0.005)
+    elif i_a < (len_cl + len_pa):
+        i_b = i_a - len_cl
+        ax.quiver(x_pa[0:i_b], y_pa[0:i_b], xth_pa[0:i_b], yth_pa[0:i_b], color="green", angles='xy', scale_units='xy', scale=1, width=0.005)
+    else:
+        i_c = len_cl + len_pa
+        ax.quiver(x_pa[0:i_c], y_pa[0:i_c], xth_pa[0:i_c], yth_pa[0:i_c], color="green", angles='xy', scale_units='xy', scale=1, width=0.005)
+
+anim = animation.FuncAnimation(fig, animate,frames=(len_cl + len_pa), interval=1)
+
+plt.show()
+
 ## used to time how long code takes to execute
 end_time = time.time()
 print('Total time (s):', end_time-start_time)

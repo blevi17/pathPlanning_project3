@@ -134,13 +134,16 @@ cost_go = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
 # Determine number of points per frame and the weighting of the cost to go
 if cost_go < 250:
     c_w = 1.5
-    v_w = 200
+    v_w = 1
+    #v_w = 200
 elif cost_go < 375:
     c_w = 1.5
-    v_w = 250
+    v_w = 1
+    #v_w = 250
 else:
     c_w = 3.75
-    v_w = 550
+    v_w = 1
+    #v_w = 550
 # [Total cost, cost to go (not based on goal location), index, parent, [x, y, theta], ditance traveled to reach the point] #will be easier to compute below if we track cost to go for each node
 el1 = [0, 0, 0, 0, node_i, 0]
 open_l.put(el1) # starting the open list
@@ -228,11 +231,11 @@ while not open_l.empty():
 # get points in the obstacle space
 x_obs = []
 y_obs = []
-for i in range(0, 6000, 4):
-    for j in range(0, 2000, 4):
+for i in range(-499, 5500, 4):
+    for j in range(-999, 1000, 4):
         if obs[i, j] == 1:
-            x_obs.append(i)
-            y_obs.append(j)
+            x_obs.append(i+500)
+            y_obs.append(j+1000)
 
 # save closed explored x and y points
 plt1_size = closed_l.qsize()
@@ -270,12 +273,14 @@ for i_pa in range(0, len_pa):
 #plotting the obstacle space
 fig, ax = plt.subplots(figsize=(12, 7))
 plt.plot(x_obs, y_obs, 'b.', markersize=1)
-plt.xlim((0, 6000))
-plt.ylim((0, 2000))
+plt.xlim((-500, 5500))
+plt.ylim((-1000, 1000))
 
 # plot all of the explored points in a test
 len_cl = len(x_exp1)
 len_pa = len(x_pa)
+print(len_cl)
+print(len_pa)
 def animate(fr):
     i_a = fr * v_w # range of points displayed in each frame
     if i_a < len_cl:

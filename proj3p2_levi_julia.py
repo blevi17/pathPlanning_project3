@@ -20,7 +20,7 @@ L = 160  # wheel center to center distance in mm
 v_mr = 2.84  # maximum rotational velocity in rad/s
 v_mrev = float(v_mr * 60 / (2 * pi))  # maximum rotational velocity in revolutions/minute
 v_mt = 220  # maximum translational velocity in mm/s according to the spec sheet
-dt = 0.2  # Time step that we get to define  ###############################################################################
+dt = 1  # Time step that we get to define  ###############################################################################
 
 ################################## Functions ###############################################
 # define function to convert user input into node format
@@ -76,9 +76,9 @@ for i in range(6000):
     # print('i',i)
     for j in range(2000):
         # print('j',j)
-        if j<=(1250 + r + c) and (2395 - r - c)<=i<=(2650 + r + c): #bottom rectangle definition w/ robot radius and clearance
+        if j<=(1250 + r + c) and (2500 - r - c)<=i<=(2650 + r + c): #bottom rectangle definition w/ robot radius and clearance
             obs[i,j]=1
-        elif j>=(750 - r - c) and (1395 - r - c)<=i<=(1650 + r + c): #top rectangle definition w/ robot radius and clearance
+        elif j>=(750 - r - c) and (1500 - r - c)<=i<=(1650 + r + c): #top rectangle definition w/ robot radius and clearance
             obs[i,j]=1
         elif (i - 4000)**2 + (j - 1100)**2 <= (500 + r + c)**2: #circle definition w/ margin
             obs[i,j]=1
@@ -135,15 +135,15 @@ cost_go = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
 if cost_go < 250:
     c_w = 1.5
     v_w = 1
-    #v_w = 200
+    v_w = 200
 elif cost_go < 375:
     c_w = 1.5
     v_w = 1
-    #v_w = 250
+    v_w = 250
 else:
     c_w = 3.75
     v_w = 1
-    #v_w = 550
+    v_w = 5000
 # [Total cost, cost to go (not based on goal location), index, parent, [x, y, theta], ditance traveled to reach the point] #will be easier to compute below if we track cost to go for each node
 el1 = [0, 0, 0, 0, node_i, 0]
 open_l.put(el1) # starting the open list
@@ -231,11 +231,11 @@ while not open_l.empty():
 # get points in the obstacle space
 x_obs = []
 y_obs = []
-for i in range(-499, 5500, 4):
-    for j in range(-999, 1000, 4):
+for i in range(1, 6000, 4):
+    for j in range(1, 2000, 4):
         if obs[i, j] == 1:
-            x_obs.append(i+500)
-            y_obs.append(j+1000)
+            x_obs.append(i-500)
+            y_obs.append(j-1000)
 
 # save closed explored x and y points
 plt1_size = closed_l.qsize()

@@ -20,7 +20,7 @@ L = 160  # wheel center to center distance in mm
 v_mr = 2.84  # maximum rotational velocity in rad/s
 v_mrev = float(v_mr * 60 / (2 * pi))  # maximum rotational velocity in revolutions/minute
 v_mt = 220  # maximum translational velocity in mm/s according to the spec sheet
-dt = 5  # Time step that we get to define  ###############################################################################
+dt = 1  # Time step that we get to define  ###############################################################################
 
 ################################## Functions ###############################################
 # define function to convert user input into node format

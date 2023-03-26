@@ -133,7 +133,7 @@ closed_l = PriorityQueue()
 cost_go = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
 # Determine number of points per frame and the weighting of the cost to go
 v_w = int(cost_go + 100) * 5
-c_w = 35 #(1 / 60) * (cost_go - 180)
+c_w = 3.5 #(1 / 60) * (cost_go - 180)
 # 35 worked for the c_w for 50, 50 to 1500, 60
 
 # [Total cost, cost to go (not based on goal location), index, parent, [x, y, theta], distance traveled to reach the point] #will be easier to compute below if we track cost to go for each node
@@ -159,9 +159,9 @@ while not open_l.empty():
     mat_exp_cl[round(cur_pos[0]/2)+250][round(cur_pos[1]/2)+500] = 1  # now we have explored this in the closed list
     # check if we have reached the goal
     thresh = np.sqrt((cur_pos[0] - node_g[0])**2 + (cur_pos[1] - node_g[1])**2)
-    print(thresh)
     cur_time = time.time()
-    if (cur_time - start_time) > 200:
+    if (cur_time - start_time) > 300:
+        print("Aborting attempt")
         thresh = 0
     if thresh <= 50:
         # run the backtrack function
@@ -290,7 +290,7 @@ def animate(fr):
     else:
         i_c = len_cl + len_pa
         ax.quiver(x_pa[0:i_c], y_pa[0:i_c], xth_pa[0:i_c], yth_pa[0:i_c], color="green", angles='xy', scale_units='xy', scale=1, width=0.005)
-        #plt.plot(x_pa, y_pa, "m--")
+        plt.plot(x_pa, y_pa, "m--")
 
 anim = animation.FuncAnimation(fig, animate,frames=(len_cl + len_pa), interval=1)
 

@@ -136,7 +136,7 @@ v_w = int(cost_go + 100) * 5
 c_w = 1 #(1 / 60) * (cost_go - 180)
 # 35 worked for the c_w for 50, 50 to 1500, 60
 
-# [Total cost, cost to go (not based on goal location), index, parent, [x, y, theta], ditance traveled to reach the point] #will be easier to compute below if we track cost to go for each node
+# [Total cost, cost to go (not based on goal location), index, parent, [x, y, theta], distance traveled to reach the point] #will be easier to compute below if we track cost to go for each node
 el1 = [0, 0, 0, 0, node_i, 0]
 open_l.put(el1) # starting the open list
 
@@ -219,6 +219,7 @@ while not open_l.empty():
                                 open_l.queue.remove(rep_node)
                                 imp_q = [lxu, cost_come, rep_ind, cur_ind, rep_pos, L]
                                 open_l.put(imp_q)
+                                break
             elif check_cl == 1:
                 continue
 

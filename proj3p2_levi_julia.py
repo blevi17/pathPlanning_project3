@@ -33,7 +33,7 @@ def input2node(input):
 def move_step(u_l, u_r, theta):
     dx1 = float((R/2) * (u_l + u_r) * cos(theta) * dt)
     dy1 = float((R/2) * (u_l + u_r) * sin(theta) * dt)
-    dth1 = float((R/L) * (u_r + u_l) * dt)
+    dth1 = float((R/L) * (u_r - u_l) * dt)
 
     return dx1, dy1, dth1
 
@@ -132,18 +132,10 @@ closed_l = PriorityQueue()
 # Create the first element in the list
 cost_go = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
 # Determine number of points per frame and the weighting of the cost to go
-if cost_go < 250:
-    c_w = 1.5
-    v_w = 1
-    v_w = 200
-elif cost_go < 375:
-    c_w = 1.5
-    v_w = 1
-    v_w = 250
-else:
-    c_w = 3.75
-    v_w = 1
-    v_w = 5000
+v_w = int(cost_go + 100) * 5
+c_w = 10000  #(1 / 60) * (cost_go - 180)
+# 35 worked for the c_w for 50, 50 to 1500, 60
+
 # [Total cost, cost to go (not based on goal location), index, parent, [x, y, theta], ditance traveled to reach the point] #will be easier to compute below if we track cost to go for each node
 el1 = [0, 0, 0, 0, node_i, 0]
 open_l.put(el1) # starting the open list

@@ -20,7 +20,7 @@ L = 160  # wheel center to center distance in mm
 v_mr = 2.84  # maximum rotational velocity in rad/s
 v_mrev = float(v_mr * 60 / (2 * pi))  # maximum rotational velocity in revolutions/minute
 v_mt = 220  # maximum translational velocity in mm/s according to the spec sheet
-dt = 1  # Time step that we get to define  ###############################################################################
+dt = 5  # Time step that we get to define  ###############################################################################
 
 ################################## Functions ###############################################
 # define function to convert user input into node format
@@ -133,7 +133,7 @@ closed_l = PriorityQueue()
 cost_go = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
 # Determine number of points per frame and the weighting of the cost to go
 v_w = int(cost_go + 100) * 5
-c_w = 35  #(1 / 60) * (cost_go - 180)
+c_w = 20 #(1 / 60) * (cost_go - 180)
 # 35 worked for the c_w for 50, 50 to 1500, 60
 
 # [Total cost, cost to go (not based on goal location), index, parent, [x, y, theta], ditance traveled to reach the point] #will be easier to compute below if we track cost to go for each node
@@ -159,7 +159,7 @@ while not open_l.empty():
     mat_exp_cl[round(cur_pos[0]/2)+250][round(cur_pos[1]/2)+500] = 1  # now we have explored this in the closed list
     # check if we have reached the goal
     thresh = np.sqrt((cur_pos[0] - node_g[0])**2 + (cur_pos[1] - node_g[1])**2)
-    if thresh <= 30:
+    if thresh <= 50:
         # run the backtrack function
         node_path = trace_back(closed_l, cur_par, cur_ind)
         ## added to the print line below to verify that final state is correct
@@ -182,6 +182,8 @@ while not open_l.empty():
             elif new_pos[2]<0:
                 new_pos[2] = new_pos[2]+360
             # Check if the new location is in the closed list or obstacle space
+            if new_pos[0]>5500 or new_pos[0]<-500 or new_pos[1]<-1000 or new_pos[1]>1000:
+                continue
             check_cl = mat_exp_cl[round(new_pos[0]/2)+250][round(new_pos[1]/2)+500]
             check_ol = mat_exp_ol[round(new_pos[0]/2)+250][round(new_pos[1]/2)+500]
             check_ob = obs[round(new_pos[0]/2)+250][round(new_pos[1]/2)+500] #no theta value for obstacles
@@ -226,8 +228,8 @@ y_obs = []
 for i in range(1, 3000, 4):
     for j in range(1, 1000, 4):
         if obs[i, j] == 1:
-            x_obs.append(i-250)
-            y_obs.append(j-500)
+            x_obs.append((i-250)*2)
+            y_obs.append((j-500)*2)
 
 # save closed explored x and y points
 plt1_size = closed_l.qsize()
@@ -283,6 +285,7 @@ def animate(fr):
     else:
         i_c = len_cl + len_pa
         ax.quiver(x_pa[0:i_c], y_pa[0:i_c], xth_pa[0:i_c], yth_pa[0:i_c], color="green", angles='xy', scale_units='xy', scale=1, width=0.005)
+        plt.plot(x_pa, y_pa, "m--")
 
 anim = animation.FuncAnimation(fig, animate,frames=(len_cl + len_pa), interval=1)
 

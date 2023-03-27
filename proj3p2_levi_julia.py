@@ -213,8 +213,8 @@ while not open_l.empty():
                     if m_co >  lxu:
                         for j in range(0, open_l.qsize()):
                             check_pos = open_l.queue[j][4]
-                            i_c = check_pos[0]
-                            j_c = check_pos[1]
+                            i_c = round(check_pos[0]/2 + 250)
+                            j_c = round(check_pos[1]/2+500)
                             if i_c == (round(new_pos[0]/2+250)) and j_c == (round(new_pos[1]/2+500)):
                                 idx = j
                                 rep_pos = open_l.queue[idx][4]

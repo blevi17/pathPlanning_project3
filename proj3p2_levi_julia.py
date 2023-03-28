@@ -20,7 +20,7 @@ L = 160  # wheel center to center distance in mm
 v_mr = 2.84  # maximum rotational velocity in rad/s
 v_mrev = float(v_mr * 60 / (2 * pi))  # maximum rotational velocity in revolutions/minute
 v_mt = 220  # maximum translational velocity in mm/s according to the spec sheet
-dt = 1  # Time step that we get to define  ###############################################################################
+dt = 3  # Time step that we get to define  ###############################################################################
 
 ################################## Functions ###############################################
 # define function to convert user input into node format
@@ -71,27 +71,27 @@ while 1:
 
 # Check the obstacle space
 # I want to make the bottom left corner the obstacle space of the matrix we are checking
-obs = np.zeros((3000, 1000))  # might have to change this depending on step sizes
-for i in range(3000):
+obs = np.zeros((600, 200))  # might have to change this depending on step sizes
+for i in range(600):
     # print('i',i)
-    for j in range(1000):
+    for j in range(200):
         # print('j',j)
-        if j<=(1250 + r + c)/2 and (2500 - r - c)/2<=i<=(2650 + r + c)/2: #bottom rectangle definition w/ robot radius and clearance
+        if j<=(1250 + r + c)/10 and (2500 - r - c)/10<=i<=(2650 + r + c)/10: #bottom rectangle definition w/ robot radius and clearance
             obs[i,j]=1
-        elif j>=(750 - r - c)/2 and (1500 - r - c)/2<=i<=(1650 + r + c)/2: #top rectangle definition w/ robot radius and clearance
+        elif j>=(750 - r - c)/10 and (1500 - r - c)/10<=i<=(1650 + r + c)/10: #top rectangle definition w/ robot radius and clearance
             obs[i,j]=1
-        elif (i - 2000)**2 + (j - 550)**2 <= ((500 + r + c)/2)**2: #circle definition w/ margin
+        elif (i - 400)**2 + (j - 110)**2 <= ((500 + r + c)/10)**2: #circle definition w/ margin
             obs[i,j]=1
-        elif i<=(r+c)/2 or i>=(6000 - r - c)/2:  #vertical wall definition
+        elif i<=(r+c)/10 or i>=(6000 - r - c)/10:  #vertical wall definition
             obs[i,j]=1
-        elif j<=(r+c)/2 or j>=(2000 - r - c)/2:  #horizontal wall definition
+        elif j<=(r+c)/10 or j>=(2000 - r - c)/10:  #horizontal wall definition
             obs[i,j]=1
 
 while 1:
     try:
         start_input = input("Start State:")
         node_i = input2node(start_input)
-        if obs[int(node_i[0]/2 + 250),int(node_i[1]/2 + 500)]==1:
+        if obs[int(node_i[0]/10 + 50),int(node_i[1]/10 + 100)]==1:
             print('Start State inside an obstacle. Try again...')
         else:
             break
@@ -101,7 +101,7 @@ while 1:
     try:
         goal_input = input("Goal State:")
         node_g = input2node(goal_input)
-        if obs[int(node_g[0]/2+250),int(node_g[1]/2+500)]==1:
+        if obs[int(node_g[0]/10+50),int(node_g[1]/10+100)]==1:
             print('Goal State inside an obstacle. Try again...')
         else:
             break
@@ -133,7 +133,7 @@ closed_l = PriorityQueue()
 cost_go = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
 # Determine number of points per frame and the weighting of the cost to go
 v_w = int(cost_go + 100) * 5
-c_w = 10 #(1 / 60) * (cost_go - 180)
+c_w = 2 #(1 / 60) * (cost_go - 180)
 # 35 worked for the c_w for 50, 50 to 1500, 60
 
 # [Total cost, cost to go (not based on goal location), index, parent, [x, y, theta], distance traveled to reach the point] #will be easier to compute below if we track cost to go for each node
@@ -142,9 +142,9 @@ open_l.put(el1) # starting the open list
 
 # Starting the search
 id = el1[1]  # index of new nodes
-mat_exp_ol = np.zeros((3007, 1007))  # empty matrix to record where we have explored in the open list (we don't care about angle at the goal)
-mat_exp_cl = np.zeros((3007, 1007))  # empty matrix to record where we have explored in the closed list
-mat_cost = np.zeros((3007, 1007)) # saving the cost in a matrix
+mat_exp_ol = np.zeros((607, 207))  # empty matrix to record where we have explored in the open list (we don't care about angle at the goal)
+mat_exp_cl = np.zeros((607, 207))  # empty matrix to record where we have explored in the closed list
+mat_cost = np.zeros((607, 207)) # saving the cost in a matrix
 while not open_l.empty():
     # pull out a node and add it to the closed list
     x = open_l.get()
@@ -156,7 +156,7 @@ while not open_l.empty():
     cur_par = x[3]
     cur_pos = x[4]
 
-    mat_exp_cl[round(cur_pos[0]/2)+250][round(cur_pos[1]/2)+500] = 1  # now we have explored this in the closed list
+    mat_exp_cl[round(cur_pos[0]/10)+50][round(cur_pos[1]/10)+100] = 1  # now we have explored this in the closed list
     # check if we have reached the goal
     thresh = np.sqrt((cur_pos[0] - node_g[0])**2 + (cur_pos[1] - node_g[1])**2)
     cur_time = time.time()
@@ -188,9 +188,9 @@ while not open_l.empty():
             # Check if the new location is in the closed list or obstacle space
             if new_pos[0]>5500/2 or new_pos[0]<-500/2 or new_pos[1]<-1000/2 or new_pos[1]>1000/2:
                 continue
-            check_cl = mat_exp_cl[round(new_pos[0]/2)+250][round(new_pos[1]/2)+500]
-            check_ol = mat_exp_ol[round(new_pos[0]/2)+250][round(new_pos[1]/2)+500]
-            check_ob = obs[round(new_pos[0]/2)+250][round(new_pos[1]/2)+500] #no theta value for obstacles
+            check_cl = mat_exp_cl[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100]
+            check_ol = mat_exp_ol[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100]
+            check_ob = obs[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100] #no theta value for obstacles
             cg = float(np.sqrt(dx**2 + dy**2))
             cost_come = cur_go + cg
             cost_go = c_w * np.sqrt((node_g[0]-new_pos[0])**2 + (node_g[1]-new_pos[1])**2)  # weighted cost to go
@@ -200,22 +200,22 @@ while not open_l.empty():
                 continue #we can skip all the updating code if the new node is in the obstacle space
             elif check_cl == 0:
                 if check_ol == 0:
-                    mat_exp_ol[round(new_pos[0]/2)+250][round(new_pos[1]/2)+500] = 1
+                    mat_exp_ol[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100] = 1
                     id = id + 1
                     # lxu is cost to come plus cost to go
                     new_node = [lxu, cost_come, id, cur_ind, new_pos, L]
-                    mat_cost[round(new_pos[0]/2)+250][round(new_pos[1]/2)+500] = lxu  #update the cost matrix
+                    mat_cost[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100] = lxu  #update the cost matrix
                     open_l.put(new_node)
                 # Finding a repeat in the open loop
                 elif check_ol == 1:
-                    m_co = mat_cost[round(new_pos[0]/2)+250][round(new_pos[1]/2)+500]
+                    m_co = mat_cost[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100]
                     # If the cost of the old node is larger
                     if m_co >  lxu:
                         for j in range(0, open_l.qsize()):
                             check_pos = open_l.queue[j][4]
-                            i_c = round(check_pos[0]/2 + 250)
-                            j_c = round(check_pos[1]/2+500)
-                            if i_c == (round(new_pos[0]/2+250)) and j_c == (round(new_pos[1]/2+500)):
+                            i_c = round(check_pos[0]/10 + 50)
+                            j_c = round(check_pos[1]/10+100)
+                            if i_c == (round(new_pos[0]/10+50)) and j_c == (round(new_pos[1]/10+100)):
                                 idx = j
                                 rep_pos = open_l.queue[idx][4]
                                 rep_ind = open_l.queue[idx][2]
@@ -230,11 +230,11 @@ while not open_l.empty():
 # get points in the obstacle space
 x_obs = []
 y_obs = []
-for i in range(1, 3000, 4):
-    for j in range(1, 1000, 4):
+for i in range(1, 600, 2):
+    for j in range(1, 200, 2):
         if obs[i, j] == 1:
-            x_obs.append((i-250)*2)
-            y_obs.append((j-500)*2)
+            x_obs.append((i-50)*10)
+            y_obs.append((j-100)*10)
 
 # save closed explored x and y points
 plt1_size = closed_l.qsize()
@@ -271,7 +271,7 @@ for i_pa in range(0, len_pa):
 
 #plotting the obstacle space
 fig, ax = plt.subplots(figsize=(12, 7))
-plt.plot(x_obs, y_obs, 'b.', markersize=1)
+plt.plot(x_obs, y_obs, 'b.', markersize=5)
 plt.xlim((-500, 5500))
 plt.ylim((-1000, 1000))
 
@@ -290,7 +290,7 @@ def animate(fr):
     else:
         i_c = len_cl + len_pa
         ax.quiver(x_pa[0:i_c], y_pa[0:i_c], xth_pa[0:i_c], yth_pa[0:i_c], color="green", angles='xy', scale_units='xy', scale=1, width=0.005)
-        plt.plot(x_pa, y_pa, "m--")
+        #plt.plot(x_pa, y_pa, "m--")
 
 anim = animation.FuncAnimation(fig, animate,frames=(len_cl + len_pa), interval=1)
 

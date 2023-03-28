@@ -20,7 +20,7 @@ L = 160  # wheel center to center distance in mm
 v_mr = 2.84  # maximum rotational velocity in rad/s
 v_mrev = float(v_mr * 60 / (2 * pi))  # maximum rotational velocity in revolutions/minute
 v_mt = 220  # maximum translational velocity in mm/s according to the spec sheet
-dt = 3  # Time step that we get to define  ###############################################################################
+dt = 2  # Time step that we get to define  ###############################################################################
 
 ################################## Functions ###############################################
 # define function to convert user input into node format
@@ -132,8 +132,8 @@ closed_l = PriorityQueue()
 # Create the first element in the list
 cost_go = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
 # Determine number of points per frame and the weighting of the cost to go
-v_w = int(cost_go + 100) * 5
-c_w = 2 #(1 / 60) * (cost_go - 180)
+v_w = int(cost_go/20)
+c_w = 3.5 #(1 / 60) * (cost_go - 180)
 # 35 worked for the c_w for 50, 50 to 1500, 60
 
 # [Total cost, cost to go (not based on goal location), index, parent, [x, y, theta], distance traveled to reach the point] #will be easier to compute below if we track cost to go for each node
@@ -145,6 +145,7 @@ id = el1[1]  # index of new nodes
 mat_exp_ol = np.zeros((607, 207))  # empty matrix to record where we have explored in the open list (we don't care about angle at the goal)
 mat_exp_cl = np.zeros((607, 207))  # empty matrix to record where we have explored in the closed list
 mat_cost = np.zeros((607, 207)) # saving the cost in a matrix
+node_path = [0, 0]  # creating this to test a bug
 while not open_l.empty():
     # pull out a node and add it to the closed list
     x = open_l.get()
@@ -160,7 +161,7 @@ while not open_l.empty():
     # check if we have reached the goal
     thresh = np.sqrt((cur_pos[0] - node_g[0])**2 + (cur_pos[1] - node_g[1])**2)
     cur_time = time.time()
-    if (cur_time - start_time) > 600:
+    if (cur_time - start_time) > 120:
         print("Aborting attempt")
         thresh = 0
     if thresh <= 50:

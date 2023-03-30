@@ -7,6 +7,7 @@ import numpy as np
 from queue import PriorityQueue
 import matplotlib.pyplot as plt
 from matplotlib import animation
+import math
 from sympy import *
 import time
 
@@ -14,7 +15,7 @@ import time
 start_time = time.time()
 
 # Variables from the datasheet of the turtlebot
-R = 66  # wheel radius in mm
+R = 33  # wheel radius in mm
 r = 105 # necessary buffer around the robot in mm
 L = 160  # wheel center to center distance in mm
 v_mr = 2.84  # maximum rotational velocity in rad/s
@@ -31,11 +32,12 @@ def input2node(input):
     return output
 
 def move_step(u_l, u_r, theta):
-    dx1 = float((R/2) * (u_l + u_r) * cos(theta) * dt)
-    dy1 = float((R/2) * (u_l + u_r) * sin(theta) * dt)
-    dth1 = float((R/L) * (u_r - u_l) * dt)
+    dx1 = (R/2) * (u_l + u_r) * math.cos(theta) * dt
+    dy1 = (R/2) * (u_l + u_r) * math.sin(theta) * dt
+    dth1 = (R/L) * (u_r - u_l) * dt
+    dth1_deg = float(dth1 * 180 / pi)
 
-    return dx1, dy1, dth1
+    return dx1, dy1, dth1_deg
 
 # This reverses a list
 def reverse_list(listio):
@@ -132,8 +134,8 @@ closed_l = PriorityQueue()
 # Create the first element in the list
 cost_go = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
 # Determine number of points per frame and the weighting of the cost to go
-v_w = int(cost_go/20)
-c_w = 3.5 #(1 / 60) * (cost_go - 180)
+v_w = int(cost_go/10)
+c_w = 2.5 #(1 / 60) * (cost_go - 180)
 # 35 worked for the c_w for 50, 50 to 1500, 60
 
 # [Total cost, cost to go (not based on goal location), index, parent, [x, y, theta], distance traveled to reach the point] #will be easier to compute below if we track cost to go for each node
@@ -161,7 +163,7 @@ while not open_l.empty():
     # check if we have reached the goal
     thresh = np.sqrt((cur_pos[0] - node_g[0])**2 + (cur_pos[1] - node_g[1])**2)
     cur_time = time.time()
-    if (cur_time - start_time) > 120:
+    if (cur_time - start_time) > 240:
         print("Aborting attempt")
         thresh = 0
     if thresh <= 50:
@@ -187,7 +189,7 @@ while not open_l.empty():
             elif new_pos[2]<0:
                 new_pos[2] = new_pos[2]+360
             # Check if the new location is in the closed list or obstacle space
-            if new_pos[0]>5500/2 or new_pos[0]<-500/2 or new_pos[1]<-1000/2 or new_pos[1]>1000/2:
+            if new_pos[0]>5500 or new_pos[0]<-500 or new_pos[1]<-1000 or new_pos[1]>1000:
                 continue
             check_cl = mat_exp_cl[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100]
             check_ol = mat_exp_ol[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100]

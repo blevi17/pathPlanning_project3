@@ -249,8 +249,8 @@ for i1_plot in range(0, plt1_size):
     L = closed_l.queue[i1_plot][5]
     x_exp1.append(closed_l.queue[i1_plot][4][0])
     y_exp1.append(closed_l.queue[i1_plot][4][1])
-    xth_exp1.append(float(L * cos(closed_l.queue[i1_plot][4][2] * pi / 180)))
-    yth_exp1.append(float(L * sin(closed_l.queue[i1_plot][4][2] * pi / 180)))
+    xth_exp1.append(L * math.cos(closed_l.queue[i1_plot][4][2] * pi / 180))
+    yth_exp1.append(L * math.sin(closed_l.queue[i1_plot][4][2] * pi / 180))
 x_exp1 = reverse_list(x_exp1)
 y_exp1 = reverse_list(y_exp1)
 xth_exp1 = reverse_list(xth_exp1)
@@ -269,8 +269,8 @@ for i_pa in range(0, len_pa):
             L = closed_l.queue[j_pa][5]
             x_pa.append(closed_l.queue[j_pa][4][0])
             y_pa.append(closed_l.queue[j_pa][4][1])
-            xth_pa.append(float(L * cos(closed_l.queue[j_pa][4][2] * pi / 180)))
-            yth_pa.append(float(L * sin(closed_l.queue[j_pa][4][2] * pi / 180)))
+            xth_pa.append(L * math.cos(closed_l.queue[j_pa][4][2] * pi / 180))
+            yth_pa.append(L * math.sin(closed_l.queue[j_pa][4][2] * pi / 180))
 
 #plotting the obstacle space
 fig, ax = plt.subplots(figsize=(12, 7))

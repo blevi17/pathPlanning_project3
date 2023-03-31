@@ -64,8 +64,8 @@ def trace_back(q_cl, par, cur_ind):
 while 1:
     try:
         c = float(input("Clearance:"))
-        if L>190 or L<0:
-            print('Clearance is too large to guarantee the goal is reachabel! Try Again...')
+        if c>190 or c<0:
+            print('Clearance is too large to guarantee the goal is reachable! Try Again...')
         else:
             break
     except:
@@ -73,6 +73,7 @@ while 1:
 
 # Check the obstacle space
 # I want to make the bottom left corner the obstacle space of the matrix we are checking
+## For part 1 we are supposed to use the same map as we did in phase 1 (see 2nd bullet on slide 15 of instructions) not the Gazebo map provided for part 2
 obs = np.zeros((600, 200))  # might have to change this depending on step sizes
 for i in range(600):
     # print('i',i)
@@ -89,6 +90,7 @@ for i in range(600):
         elif j<=(r+c)/10 or j>=(2000 - r - c)/10:  #horizontal wall definition
             obs[i,j]=1
 
+## how are you getting the acceptable ranges below? Should it be x is 0 to 600 and y is 0 to 250 like before?
 while 1:
     try:
         start_input = input("Start State:")
@@ -138,7 +140,7 @@ v_w = int(cost_go/10)
 c_w = 2.5 #(1 / 60) * (cost_go - 180)
 # 35 worked for the c_w for 50, 50 to 1500, 60
 
-# [Total cost, cost to go (not based on goal location), index, parent, [x, y, theta], distance traveled to reach the point] #will be easier to compute below if we track cost to go for each node
+# [Total cost, cost to go (not based on goal location), index, parent, [x, y, theta], distance traveled to reach the point]
 el1 = [0, 0, 0, 0, node_i, 0]
 open_l.put(el1) # starting the open list
 

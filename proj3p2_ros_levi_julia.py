@@ -244,8 +244,24 @@ for i_pa in range(0, len_pa):
     for j_pa in range(0, plt1_size):
         if closed_l.queue[j_pa][2] == ind_pa:
             L = closed_l.queue[j_pa][5]
-            x_v.append(closed_l.queue[j_pa][6][0])
-            y_v.append(closed_l.queue[j_pa][6][1])
+            x_v.append(closed_l.queue[j_pa][6][0]*1000) # dt is 1 second, ros works in meters
+            y_v.append(closed_l.queue[j_pa][6][1]*1000)
+
+# Creating a talker function
+def talker():
+    msg = Twist()
+    pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+    rospy.init_node('robot_talker', anonymous=True)
+    for i in range(len(x_v)):
+        if not rospy.is_shutdown():
+            msg.linear.x = x_v[i]
+            msg.linear.y = y_v[i]
+            #buffer is based on the dt value
+            pub.publish(msg)
+            time.sleep(dt)
+
+if __name__ == '__main__':
+    talker()
             
 ## used to time how long code takes to execute
 end_time = time.time()

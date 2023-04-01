@@ -244,8 +244,8 @@ for i_pa in range(0, len_pa):
     for j_pa in range(0, plt1_size):
         if closed_l.queue[j_pa][2] == ind_pa:
             L = closed_l.queue[j_pa][5]
-            x_v.append(closed_l.queue[j_pa][6][0]*1000) # dt is 1 second, ros works in meters
-            y_v.append(closed_l.queue[j_pa][6][1]*1000)
+            x_v.append(closed_l.queue[j_pa][6][0]*1000/dt) # dt is 1 second, ros works in meters
+            y_v.append(closed_l.queue[j_pa][6][1]*1000/dt)
 
 # Creating a talker function
 def talker():

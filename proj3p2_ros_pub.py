@@ -258,7 +258,7 @@ def astar_path():
             msg.angular.z = th_v[i]
             #buffer is based on the dt value
             pub.publish(msg)
-            time.sleep(dt)
+            rospy.sleep(dt)
 
 if __name__ == '__main__':
     astar_path()

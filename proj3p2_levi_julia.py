@@ -137,7 +137,7 @@ closed_l = PriorityQueue()
 cost_go = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
 # Determine number of points per frame and the weighting of the cost to go
 v_w = int(cost_go/10)
-c_w = 2.5 #(1 / 60) * (cost_go - 180)
+c_w = 7 #(1 / 60) * (cost_go - 180)
 # 35 worked for the c_w for 50, 50 to 1500, 60
 
 # [Total cost, cost to go (not based on goal location), index, parent, [x, y, theta], distance traveled to reach the point]
@@ -177,7 +177,7 @@ while not open_l.empty():
             # no slip condition
             ul = float(rpm[0] * pi / 30)
             ur = float(rpm[1] * pi / 30)
-            dx, dy, dth = move_step(ul, ur, cur_pos[2])
+            dx, dy, dth = move_step(ul, ur, float(cur_pos[2]*pi/180))
             L = float(np.sqrt(dx**2 + dy**2))
             new_pos = [cur_pos[0] + dx, cur_pos[1] + dy, cur_pos[2] + dth]
 

@@ -1,14 +1,7 @@
-# This is the file that creates the output for the ros portion of Path Planning Project 3 Phase 2
-# It says to use the map from phase 1, but the turtlebot won't fit in that 
-# by Levi Butler and Julia Macon Kim
-# GitHub repository: https://github.com/blevi17/pathPlanning_project3
-
 import numpy as np
 from queue import PriorityQueue
-import matplotlib.pyplot as plt
-#import rospy
-#from geometry_msgs.msg import Twist
-from matplotlib import animation
+import rospy
+from geometry_msgs.msg import Twist
 import math
 from sympy import *
 import time
@@ -234,75 +227,39 @@ while not open_l.empty():
             elif check_cl == 1:
                 continue
 
-# get points in the obstacle space
-x_obs = []
-y_obs = []
-for i in range(1, 600, 2):
-    for j in range(1, 200, 2):
-        if obs[i, j] == 1:
-            x_obs.append((i-50)*10)
-            y_obs.append((j-100)*10)
-
-# save closed explored x and y points
-plt1_size = closed_l.qsize()
-x_exp1 = []
-y_exp1 = []
-xth_exp1 = []
-yth_exp1 = []
-for i1_plot in range(0, plt1_size):
-    dist = closed_l.queue[i1_plot][5]
-    x_exp1.append(closed_l.queue[i1_plot][4][0])
-    y_exp1.append(closed_l.queue[i1_plot][4][1])
-    xth_exp1.append(dist * math.cos(closed_l.queue[i1_plot][4][2] * pi / 180))
-    yth_exp1.append(dist * math.sin(closed_l.queue[i1_plot][4][2] * pi / 180))
-x_exp1 = reverse_list(x_exp1)
-y_exp1 = reverse_list(y_exp1)
-xth_exp1 = reverse_list(xth_exp1)
-yth_exp1 = reverse_list(yth_exp1)
-
 # record the path
+plt1_size = closed_l.qsize()
 len_pa = len(node_path)
-x_pa = []
-y_pa = []
-xth_pa = []
-yth_pa = []
+x_v = []
+y_v = []
+th_v = []
 for i_pa in range(0, len_pa):
     ind_pa = node_path[i_pa]
     for j_pa in range(0, plt1_size):
         if closed_l.queue[j_pa][2] == ind_pa:
             dist = closed_l.queue[j_pa][5]
-            x_pa.append(closed_l.queue[j_pa][4][0])
-            y_pa.append(closed_l.queue[j_pa][4][1])
-            xth_pa.append(dist * math.cos(closed_l.queue[j_pa][4][2] * pi / 180))
-            yth_pa.append(dist * math.sin(closed_l.queue[j_pa][4][2] * pi / 180))
-
-#plotting the obstacle space
-fig, ax = plt.subplots(figsize=(12, 7))
-plt.plot(x_obs, y_obs, 'b.', markersize=5)
-plt.xlim((-500, 5500))
-plt.ylim((-1000, 1000))
-
-# plot all of the explored points in a test
-len_cl = len(x_exp1)
-len_pa = len(x_pa)
-print(len_cl)
-print(len_pa)
-def animate(fr):
-    i_a = fr * v_w # range of points displayed in each frame
-    if i_a < len_cl:
-        ax.quiver(x_exp1[0:i_a], y_exp1[0:i_a], xth_exp1[0:i_a], yth_exp1[0:i_a], color="red", angles='xy', scale_units='xy', scale=1, width=0.005)
-    elif i_a < (len_cl + len_pa):
-        i_b = i_a - len_cl
-        ax.quiver(x_pa[0:i_b], y_pa[0:i_b], xth_pa[0:i_b], yth_pa[0:i_b], color="green", angles='xy', scale_units='xy', scale=1, width=0.005)
-    else:
-        i_c = len_cl + len_pa
-        ax.quiver(x_pa[0:i_c], y_pa[0:i_c], xth_pa[0:i_c], yth_pa[0:i_c], color="green", angles='xy', scale_units='xy', scale=1, width=0.005)
-        #plt.plot(x_pa, y_pa, "m--")
-
-anim = animation.FuncAnimation(fig, animate,frames=(len_cl + len_pa), interval=1)
-
-plt.show()
-
+            x_v.append(closed_l.queue[j_pa][6][0] / (1000 * dt))
+            y_v.append(closed_l.queue[j_pa][6][1] / (1000 * dt))
+            th_v.append(float(closed_l.queue[j_pa][6][1] * pi / (180 * dt)))
+            
 ## used to time how long code takes to execute
 end_time = time.time()
 print('Total time (s):', end_time-start_time)
+
+# Creating a talker function
+def astar_path():
+    msg = Twist()
+    pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+    rospy.init_node('astar_path', anonymous=True)
+    rate = rospy.Rate(1/dt)
+    for i in range(len(x_v)):
+        if not rospy.is_shutdown():
+            msg.linear.x = float(np.sqrt(x_v[i]**2 + y_v[i]**2))
+            msg.angular.z = th_v[i]
+            #buffer is based on the dt value
+            pub.publish(msg)
+            time.sleep()
+
+if __name__ == '__main__':
+    astar_path()
+ 

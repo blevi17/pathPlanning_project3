@@ -58,9 +58,9 @@ def trace_back(q_cl, par, cur_ind):
 # Taking in user input
 while 1:
     try:
-        c = float(input("Clearance:"))
+        c = float(input("Clearance (mm):"))
         if c>190 or c<0:
-            print('Clearance is too large to guarantee the goal is reachable! Try Again...')
+            print('Clearance is too large to guarantee the goal is reachable! Must be less than 190. Try Again...')
         else:
             break
     except:
@@ -88,7 +88,7 @@ for i in range(600):
 ## how are you getting the acceptable ranges below? Should it be x is 0 to 600 and y is 0 to 250 like before?
 while 1:
     try:
-        start_input = input("Start State:")
+        start_input = input("Start State (mm):")
         node_i = input2node(start_input)
         if obs[int(node_i[0]/10 + 50),int(node_i[1]/10 + 100)]==1:
             print('Start State inside an obstacle. Try again...')
@@ -98,7 +98,7 @@ while 1:
         print('Input must be three integers separated by a comma and space (ex: 10, 10, 30). Acceptable range for first value: -499 to 5500. Acceptable range for second value: -999 to 1000. Acceptable range for third value: 0 to 359. Try again...')
 while 1:
     try:
-        goal_input = input("Goal State:")
+        goal_input = input("Goal State (mm):")
         node_g = input2node(goal_input)
         if obs[int(node_g[0]/10+50),int(node_g[1]/10+100)]==1:
             print('Goal State inside an obstacle. Try again...')

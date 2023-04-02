@@ -251,14 +251,14 @@ def astar_path():
     msg = Twist()
     pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
     rospy.init_node('astar_path', anonymous=True)
-    rate = rospy.Rate(1/dt)
+    #rate = rospy.Rate(1/dt)
     for i in range(len(x_v)):
         if not rospy.is_shutdown():
             msg.linear.x = float(np.sqrt(x_v[i]**2 + y_v[i]**2))
             msg.angular.z = th_v[i]
             #buffer is based on the dt value
             pub.publish(msg)
-            time.sleep()
+            time.sleep(dt)
 
 if __name__ == '__main__':
     astar_path()

@@ -21,7 +21,7 @@ L = 160  # wheel center to center distance in mm
 v_mr = 2.84  # maximum rotational velocity in rad/s
 v_mrev = float(v_mr * 60 / (2 * pi))  # maximum rotational velocity in revolutions/minute
 v_mt = 220  # maximum translational velocity in mm/s according to the spec sheet
-dt = 1  # Time step that we get to define  ###############################################################################
+dt = 2  # Time step that we get to define  ###############################################################################
 
 ################################## Functions ###############################################
 # define function to convert user input into node format
@@ -133,18 +133,17 @@ open_l = PriorityQueue()
 closed_l = PriorityQueue()
 
 # Create the first element in the list
-cost_go = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
+cost_go1 = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
 # Determine number of points per frame and the weighting of the cost to go
-v_w = int(cost_go/10)
-c_w = 7 #(1 / 60) * (cost_go - 180)
-# 35 worked for the c_w for 50, 50 to 1500, 60
+v_w = int(cost_go1/10)
+c_w = 1 #(1 / 60) * (cost_go - 180)
 
 # [Total cost, cost to go (not based on goal location), index, parent, [x, y, theta], distance traveled to reach the point]
-el1 = [0, cost_go, 0, 0, node_i, 0]
+el1 = [cost_go1, 0, 0, 0, node_i, 0]
 open_l.put(el1) # starting the open list
 
 # Starting the search
-id = el1[1]  # index of new nodes
+id = el1[2]  # index of new nodes
 mat_exp_ol = np.zeros((607, 207))  # empty matrix to record where we have explored in the open list (we don't care about angle at the goal)
 mat_exp_cl = np.zeros((607, 207))  # empty matrix to record where we have explored in the closed list
 mat_cost = np.zeros((607, 207)) # saving the cost in a matrix
@@ -155,7 +154,7 @@ while not open_l.empty():
     closed_l.put(x)
     # pull out useful elements
     cur_cost = x[0]
-    cur_go = x[1]
+    cur_co = x[1]
     cur_ind = x[2]
     cur_par = x[3]
     cur_pos = x[4]
@@ -163,6 +162,10 @@ while not open_l.empty():
     mat_exp_cl[round(cur_pos[0]/10)+50][round(cur_pos[1]/10)+100] = 1  # now we have explored this in the closed list
     # check if we have reached the goal
     thresh = np.sqrt((cur_pos[0] - node_g[0])**2 + (cur_pos[1] - node_g[1])**2)
+    cur_time = time.time()
+    if (cur_time - start_time) > 60:
+        print("Aborting attempt")
+        thresh = 0
     if thresh <= 50:
         # run the backtrack function
         node_path = trace_back(closed_l, cur_par, cur_ind)
@@ -178,6 +181,7 @@ while not open_l.empty():
             ur = float(rpm[1] * pi / 30)
             dx, dy, dth = move_step(ul, ur, float(cur_pos[2]*pi/180))
             dist = float(np.sqrt(dx**2 + dy**2)) #changing variable name because we used L already to define lenth between wheels
+            print(dist)
             new_pos = [cur_pos[0] + dx, cur_pos[1] + dy, cur_pos[2] + dth]
 
             # keep theta value between 0 and 359
@@ -192,9 +196,12 @@ while not open_l.empty():
             check_ol = mat_exp_ol[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100]
             check_ob = obs[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100] #no theta value for obstacles
 #             cg = float(np.sqrt(dx**2 + dy**2)) #we already defined dist as this, no need to repeat
-            cost_come = cur_cost - cur_go + dist #updated so this is current cost to come plus the new distance travelled, rather than based on cost to go
+            #cost_come = cur_cost - cur_go + dist #updated so this is current cost to come plus the new distance travelled, rather than based on cost to go
+            #print(cost_come)
+            cost_come = cur_co + dist
             cost_go = c_w * np.sqrt((node_g[0]-new_pos[0])**2 + (node_g[1]-new_pos[1])**2)  # weighted cost to go
             lxu = cost_come+cost_go  # combined cost
+            #print(lxu)
 
             if check_ob == 1: #decoupled the checks into separate statements
                 continue #we can skip all the updating code if the new node is in the obstacle space
@@ -203,7 +210,7 @@ while not open_l.empty():
                     mat_exp_ol[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100] = 1
                     id = id + 1
                     # lxu is cost to come plus cost to go
-                    new_node = [lxu, cost_go, id, cur_ind, new_pos, dist] #second item we should be tracking is cost to go
+                    new_node = [lxu, cost_come, id, cur_ind, new_pos, dist] #second item we should be tracking is cost to go
                     mat_cost[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100] = lxu  #update the cost matrix
                     open_l.put(new_node)
                 # Finding a repeat in the open loop
@@ -221,7 +228,7 @@ while not open_l.empty():
                                 rep_ind = open_l.queue[idx][2]
                                 rep_node = open_l.queue[idx]
                                 open_l.queue.remove(rep_node)
-                                imp_q = [lxu, cost_go, rep_ind, cur_ind, rep_pos, dist]
+                                imp_q = [lxu, cost_come, rep_ind, cur_ind, rep_pos, dist]
                                 open_l.put(imp_q)
                                 break
             elif check_cl == 1:

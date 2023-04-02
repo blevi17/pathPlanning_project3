@@ -63,9 +63,9 @@ def trace_back(q_cl, par, cur_ind):
 # Taking in user input
 while 1:
     try:
-        c = float(input("Clearance:"))
+        c = float(input("Clearance (mm):"))
         if c>190 or c<0:
-            print('Clearance is too large to guarantee the goal is reachable! Try Again...')
+            print('Clearance is too large to guarantee the goal is reachable! Must be less than 190. Try Again...')
         else:
             break
     except:
@@ -90,10 +90,9 @@ for i in range(600):
         elif j<=(r+c)/10 or j>=(2000 - r - c)/10:  #horizontal wall definition
             obs[i,j]=1
 
-## how are you getting the acceptable ranges below? Should it be x is 0 to 600 and y is 0 to 250 like before?
 while 1:
     try:
-        start_input = input("Start State:")
+        start_input = input("Start State (mm):")
         node_i = input2node(start_input)
         if obs[int(node_i[0]/10 + 50),int(node_i[1]/10 + 100)]==1:
             print('Start State inside an obstacle. Try again...')
@@ -103,7 +102,7 @@ while 1:
         print('Input must be three integers separated by a comma and space (ex: 10, 10, 30). Acceptable range for first value: -499 to 5500. Acceptable range for second value: -999 to 1000. Acceptable range for third value: 0 to 359. Try again...')
 while 1:
     try:
-        goal_input = input("Goal State:")
+        goal_input = input("Goal State (mm):")
         node_g = input2node(goal_input)
         if obs[int(node_g[0]/10+50),int(node_g[1]/10+100)]==1:
             print('Goal State inside an obstacle. Try again...')
@@ -141,7 +140,7 @@ c_w = 7 #(1 / 60) * (cost_go - 180)
 # 35 worked for the c_w for 50, 50 to 1500, 60
 
 # [Total cost, cost to go (not based on goal location), index, parent, [x, y, theta], distance traveled to reach the point]
-el1 = [0, 0, 0, 0, node_i, 0]
+el1 = [0, cost_go, 0, 0, node_i, 0]
 open_l.put(el1) # starting the open list
 
 # Starting the search
@@ -178,7 +177,7 @@ while not open_l.empty():
             ul = float(rpm[0] * pi / 30)
             ur = float(rpm[1] * pi / 30)
             dx, dy, dth = move_step(ul, ur, float(cur_pos[2]*pi/180))
-            L = float(np.sqrt(dx**2 + dy**2))
+            dist = float(np.sqrt(dx**2 + dy**2)) #changing variable name because we used L already to define lenth between wheels
             new_pos = [cur_pos[0] + dx, cur_pos[1] + dy, cur_pos[2] + dth]
 
             # keep theta value between 0 and 359
@@ -192,8 +191,8 @@ while not open_l.empty():
             check_cl = mat_exp_cl[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100]
             check_ol = mat_exp_ol[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100]
             check_ob = obs[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100] #no theta value for obstacles
-            cg = float(np.sqrt(dx**2 + dy**2))
-            cost_come = cur_go + cg
+#             cg = float(np.sqrt(dx**2 + dy**2)) #we already defined dist as this, no need to repeat
+            cost_come = cur_cost - cur_go + dist #updated so this is current cost to come plus the new distance travelled, rather than based on cost to go
             cost_go = c_w * np.sqrt((node_g[0]-new_pos[0])**2 + (node_g[1]-new_pos[1])**2)  # weighted cost to go
             lxu = cost_come+cost_go  # combined cost
 
@@ -204,7 +203,7 @@ while not open_l.empty():
                     mat_exp_ol[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100] = 1
                     id = id + 1
                     # lxu is cost to come plus cost to go
-                    new_node = [lxu, cost_come, id, cur_ind, new_pos, L]
+                    new_node = [lxu, cost_go, id, cur_ind, new_pos, dist] #second item we should be tracking is cost to go
                     mat_cost[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100] = lxu  #update the cost matrix
                     open_l.put(new_node)
                 # Finding a repeat in the open loop
@@ -222,7 +221,7 @@ while not open_l.empty():
                                 rep_ind = open_l.queue[idx][2]
                                 rep_node = open_l.queue[idx]
                                 open_l.queue.remove(rep_node)
-                                imp_q = [lxu, cost_come, rep_ind, cur_ind, rep_pos, L]
+                                imp_q = [lxu, cost_go, rep_ind, cur_ind, rep_pos, dist]
                                 open_l.put(imp_q)
                                 break
             elif check_cl == 1:
@@ -244,11 +243,11 @@ y_exp1 = []
 xth_exp1 = []
 yth_exp1 = []
 for i1_plot in range(0, plt1_size):
-    L = closed_l.queue[i1_plot][5]
+    dist = closed_l.queue[i1_plot][5]
     x_exp1.append(closed_l.queue[i1_plot][4][0])
     y_exp1.append(closed_l.queue[i1_plot][4][1])
-    xth_exp1.append(L * math.cos(closed_l.queue[i1_plot][4][2] * pi / 180))
-    yth_exp1.append(L * math.sin(closed_l.queue[i1_plot][4][2] * pi / 180))
+    xth_exp1.append(dist * math.cos(closed_l.queue[i1_plot][4][2] * pi / 180))
+    yth_exp1.append(dist * math.sin(closed_l.queue[i1_plot][4][2] * pi / 180))
 x_exp1 = reverse_list(x_exp1)
 y_exp1 = reverse_list(y_exp1)
 xth_exp1 = reverse_list(xth_exp1)
@@ -264,11 +263,11 @@ for i_pa in range(0, len_pa):
     ind_pa = node_path[i_pa]
     for j_pa in range(0, plt1_size):
         if closed_l.queue[j_pa][2] == ind_pa:
-            L = closed_l.queue[j_pa][5]
+            dist = closed_l.queue[j_pa][5]
             x_pa.append(closed_l.queue[j_pa][4][0])
             y_pa.append(closed_l.queue[j_pa][4][1])
-            xth_pa.append(L * math.cos(closed_l.queue[j_pa][4][2] * pi / 180))
-            yth_pa.append(L * math.sin(closed_l.queue[j_pa][4][2] * pi / 180))
+            xth_pa.append(dist * math.cos(closed_l.queue[j_pa][4][2] * pi / 180))
+            yth_pa.append(dist * math.sin(closed_l.queue[j_pa][4][2] * pi / 180))
 
 #plotting the obstacle space
 fig, ax = plt.subplots(figsize=(12, 7))

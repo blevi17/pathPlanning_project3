@@ -136,7 +136,7 @@ c_w = 7 #(1 / 60) * (cost_go - 180)
 # 35 worked for the c_w for 50, 50 to 1500, 60
 
 # [Total cost, cost to go (not based on goal location), index, parent, [x, y, theta], distance traveled to reach the point]
-el1 = [0, 0, 0, 0, node_i, 0, [0, 0]]
+el1 = [0, 0, 0, 0, node_i, 0, [0, 0, 0]]
 open_l.put(el1) # starting the open list
 
 # Starting the search
@@ -240,7 +240,7 @@ for i_pa in range(0, len_pa):
             dist = closed_l.queue[j_pa][5]
             x_v.append(closed_l.queue[j_pa][6][0] / (1000 * dt))
             y_v.append(closed_l.queue[j_pa][6][1] / (1000 * dt))
-            th_v.append(float(closed_l.queue[j_pa][6][1] * pi / (180 * dt)))
+            th_v.append(float(closed_l.queue[j_pa][6][2] * pi / (180 * dt)))
             
 ## used to time how long code takes to execute
 end_time = time.time()

@@ -209,7 +209,7 @@ while not open_l.empty():
                     mat_exp_ol[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100] = 1
                     id = id + 1
                     # lxu is cost to come plus cost to go
-                    new_node = [lxu, cost_come, id, cur_ind, new_pos, L, [dx, dy]]
+                    new_node = [lxu, cost_come, id, cur_ind, new_pos, L, [dx, dy, dth]]
                     mat_cost[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100] = lxu  #update the cost matrix
                     open_l.put(new_node)
                 # Finding a repeat in the open loop
@@ -227,7 +227,7 @@ while not open_l.empty():
                                 rep_ind = open_l.queue[idx][2]
                                 rep_node = open_l.queue[idx]
                                 open_l.queue.remove(rep_node)
-                                imp_q = [lxu, cost_come, rep_ind, cur_ind, rep_pos, L, [dx, dy]]
+                                imp_q = [lxu, cost_come, rep_ind, cur_ind, rep_pos, L, [dx, dy, dth]]
                                 open_l.put(imp_q)
                                 break
             elif check_cl == 1:
@@ -239,29 +239,32 @@ plt1_size = closed_l.qsize()
 len_pa = len(node_path)
 x_v = []
 y_v = []
+th_v = []
 for i_pa in range(0, len_pa):
     ind_pa = node_path[i_pa]
     for j_pa in range(0, plt1_size):
         if closed_l.queue[j_pa][2] == ind_pa:
             L = closed_l.queue[j_pa][5]
-            x_v.append(closed_l.queue[j_pa][6][0]/(1000*dt)) # dt is 1 second, ros works in meters
+            x_v.append(closed_l.queue[j_pa][6][0]/(1000*dt))
             y_v.append(closed_l.queue[j_pa][6][1]/(1000*dt))
+            th_v.append(float(closed_l.queue[j_pa][6][2] * pi /(180*dt)))
 
 # Creating a talker function
-def talker():
+def astar_path():
     msg = Twist()
     pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
-    rospy.init_node('robot_talker', anonymous=True)
+    rospy.init_node('astar_path', anonymous=True)
+    rate = rospy.Rate(1/dt)
     for i in range(len(x_v)):
         if not rospy.is_shutdown():
-            msg.linear.x = x_v[i]
-            msg.linear.y = y_v[i]
+            msg.linear.x = float(np.sqrt(x_v[i]**2 + y_v[i]**2))
+            msg.angular.z = th_v[i]
             #buffer is based on the dt value
             pub.publish(msg)
-            time.sleep(dt)
+            time.sleep()
 
 if __name__ == '__main__':
-    talker()
+    astar_path()
             
 ## used to time how long code takes to execute
 end_time = time.time()

@@ -259,6 +259,9 @@ def astar_path():
             #buffer is based on the dt value
             pub.publish(msg)
             rospy.sleep(dt)
+    msg.linear.x = 0.0
+    msg.angular.z = 0.0
+    pub.publish(msg)
 
 if __name__ == '__main__':
     astar_path()

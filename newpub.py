@@ -42,6 +42,7 @@ def cost(Xi,Yi,Thetai,UL,UR):
     Xn=Xi
     Yn=Yi
     Thetan = math.pi * Thetai / 180
+    Thetair = math.pi * Thetai / 180
     # Xi, Yi,Thetai: Input point's coordinates
     # Xs, Ys: Start point coordinates for plot function
     # Xn, Yn, Thetan: End point coordintes
@@ -57,7 +58,7 @@ def cost(Xi,Yi,Thetai,UL,UR):
         Yn += 0.5*r * (UL + UR) * math.sin(Thetan) * dt
         Thetan += (r / L) * (UR - UL) * dt
         D=D+ math.sqrt(math.pow((0.5*r * (UL + UR) * math.cos(Thetan) * dt),2)+math.pow((0.5*r * (UL + UR) * math.sin(Thetan) * dt),2))
-        Dth=Dth+ (Thetan-Thetai)
+        Dth=Dth+ (Thetan-Thetair)
         # Dth_list.append(Dth)
         # D_list.append(D)
     Thetan = 180 * (Thetan) / math.pi

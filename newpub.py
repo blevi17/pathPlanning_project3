@@ -57,7 +57,7 @@ def cost(Xi,Yi,Thetai,UL,UR):
         Xn += 0.5*r * (UL + UR) * math.cos(Thetan) * dt
         Yn += 0.5*r * (UL + UR) * math.sin(Thetan) * dt
         Thetan += (r / L) * (UR - UL) * dt
-        D=D+ math.sqrt(math.pow((0.5*r * (UL + UR) * math.cos(Thetan) * dt),2)+math.pow((0.5*r * (UL + UR) * math.sin(Thetan) * dt),2))
+        D=D+ math.sqrt(math.pow((0.5*r * (UL + UR) * math.cos(Thetair) * dt),2)+math.pow((0.5*r * (UL + UR) * math.sin(Thetair) * dt),2))
         Dth=Dth+ (Thetan-Thetair)
         # Dth_list.append(Dth)
         # D_list.append(D)

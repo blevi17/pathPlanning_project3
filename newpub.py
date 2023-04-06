@@ -3,7 +3,6 @@ from queue import PriorityQueue
 import rospy
 from geometry_msgs.msg import Twist
 import math
-from sympy import *
 import time
 
 ## used to time how long code takes to execute
@@ -14,7 +13,7 @@ start_time = time.time()
 b = 105 # necessary buffer around the robot in mm
 # L = 160  # wheel center to center distance in mm
 v_mr = 2.84  # maximum rotational velocity in rad/s
-v_mrev = float(v_mr * 60 / (2 * pi))  # maximum rotational velocity in revolutions/minute
+v_mrev = float(v_mr * 60 / (2 * math.pi))  # maximum rotational velocity in revolutions/minute
 v_mt = 220  # maximum translational velocity in mm/s according to the spec sheet
 # dt = 1  # Time step that we get to define  ###############################################################################
 
@@ -42,7 +41,7 @@ def cost(Xi,Yi,Thetai,UL,UR):
     Xn=Xi
     Yn=Yi
     Thetan = math.pi * Thetai / 180
-    Thetair = math.pi * Thetai / 180
+    Thetai = math.pi * Thetai / 180
     # Xi, Yi,Thetai: Input point's coordinates
     # Xs, Ys: Start point coordinates for plot function
     # Xn, Yn, Thetan: End point coordintes
@@ -58,7 +57,7 @@ def cost(Xi,Yi,Thetai,UL,UR):
         Yn += 0.5*r * (UL + UR) * math.sin(Thetan) * dt
         Thetan += (r / L) * (UR - UL) * dt
         D=D+ math.sqrt(math.pow((0.5*r * (UL + UR) * math.cos(Thetan) * dt),2)+math.pow((0.5*r * (UL + UR) * math.sin(Thetan) * dt),2))
-        Dth=Dth+ (Thetan-Thetair)
+        Dth=Dth+ (Thetan-Thetai)
         # Dth_list.append(Dth)
         # D_list.append(D)
     Thetan = 180 * (Thetan) / math.pi
@@ -180,6 +179,7 @@ while not open_l.empty():
     # pull out a node and add it to the closed list
     x = open_l.get()
     closed_l.put(x)
+    # print(x)
     # pull out useful elements
     cur_cost = x[0]
     cur_come = x[1]
@@ -211,12 +211,12 @@ while not open_l.empty():
         #     dist = float(np.sqrt(dx**2 + dy**2))
         #     new_pos = [cur_pos[0] + dx, cur_pos[1] + dy, cur_pos[2] + dth]
         for action in act:
-            ul = float(action[0] * pi / 30)
-            ur = float(action[1] * pi / 30)
+            ul = float(action[0] * math.pi / 30)
+            ur = float(action[1] * math.pi / 30)
             x_new, y_new, th_new, dist, dtheta = cost(cur_pos[0], cur_pos[1], cur_pos[2], ul, ur)
             new_pos = [x_new, y_new, th_new]
             # delta = [dist, dtheta]
-            print(new_pos)
+            # print(new_pos)
             # keep theta value between 0 and 359
             if new_pos[2]>359:
                 new_pos[2] = new_pos[2]-360
@@ -272,7 +272,7 @@ len_pa = len(node_path)
 # th_v = []
 vel = []
 angvel = []
-dt=0.1
+dt=1
 for i_pa in range(0, len_pa):
     ind_pa = node_path[i_pa]
     for j_pa in range(0, plt1_size):
@@ -297,16 +297,20 @@ def astar_path():
     msg = Twist()
     pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
     rospy.init_node('astar_path', anonymous=True)
-    rate = rospy.Rate(1/dt)
-    
+    # rate = rospy.Rate(1/dt)
+    vel_cmd = 0
+    ang_cmd = 0
     for i in range(len(vel)):
         if not rospy.is_shutdown():
         # if not rospy.is_shutdown():
-            msg.linear.x = float(vel[i])
-            msg.angular.z = float(angvel[i])
+            vel_cmd = vel[i]
+            ang_cmd = angvel[i]
+            msg.linear.x = float(vel_cmd)
+            msg.angular.z = float(ang_cmd)
             #buffer is based on the dt value
             pub.publish(msg)
-            rate.sleep()
+            rospy.sleep(dt)
+
     msg.linear.x = 0.0
     msg.angular.z = 0.0
     pub.publish(msg)

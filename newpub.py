@@ -1,7 +1,7 @@
 import numpy as np
 from queue import PriorityQueue
 import rospy
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, Pose
 import math
 import time
 
@@ -83,6 +83,26 @@ def trace_back(q_cl, par, cur_ind):
     trace_res = reverse_list(path)
 
     return trace_res
+
+# Creating a publisher for the initial pose
+#def start_pose(x1, y1, theta1):
+#    msg1 = Pose()
+#    pub1 = rospy.Publisher('cmd_vel', Pose, queue_size=10)
+#    rospy.init_node('start_pose', anonymous=True)
+#    for i in range(5):
+#        if not rospy.is_shutdown():
+#        # if not rospy.is_shutdown():
+#            msg1.position.x = float(x1)
+#            msg1.position.y = float(y1)
+#            msg1.position.z = 0
+#            msg1.orientation.x = 0
+#            msg1.orientation.y = 0
+#            msg1.orientation.z = 1
+#            msg1.orientation.w = float(theta1 * math.pi / 180)
+#            #buffer is based on the dt value
+#            pub1.publish(msg1)
+#            rospy.sleep(dt)
+
 
 ################################### Main Code #############################################
 # Taking in user input

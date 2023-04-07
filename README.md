@@ -25,7 +25,7 @@ Phase 01 Instructions:
     3. Input start node when prompted, in format x, y, theta. Theta should be in degrees, x and y in mm. Ex: 0, 0, 0
     4. Input goal node when prompted, in format x, y in mm. Ex: 5000, 500
     5. Input 2 RPM values when prompted, in format RPM1, RPM2. Ex: 10, 15
-    6. Wait for the code to calculate results
+    6. Wait for the code to calculate results. It will automatically time out after 5 minutes if calculation is taking too long.
     7. The code will output a confimration of the final node location and an animation of the path in the obstacle space. Explored nodes are in red and the final path is in green. The obstacles AND the clearance are both shown in blue.
     
 Phase 02 Instructions:

@@ -1,27 +1,21 @@
-# This is the main python file for Path Planning Project 3 Phase 2
-# It says to use the map from phase 1, but the turtlebot won't fit in that 
-# by Levi Butler and Julia Macon Kim
-# GitHub repository: https://github.com/blevi17/pathPlanning_project3
-
 import numpy as np
 from queue import PriorityQueue
 import matplotlib.pyplot as plt
 from matplotlib import animation
 import math
-from sympy import *
 import time
 
 ## used to time how long code takes to execute
 start_time = time.time()
 
 # Variables from the datasheet of the turtlebot
-R = 33  # wheel radius in mm
-r = 105 # necessary buffer around the robot in mm
-L = 160  # wheel center to center distance in mm
+# R = 33  # wheel radius in mm
+b = 105 # necessary buffer around the robot in mm
+# L = 160  # wheel center to center distance in mm
 v_mr = 2.84  # maximum rotational velocity in rad/s
-v_mrev = float(v_mr * 60 / (2 * pi))  # maximum rotational velocity in revolutions/minute
+v_mrev = float(v_mr * 60 / (2 * math.pi))  # maximum rotational velocity in revolutions/minute
 v_mt = 220  # maximum translational velocity in mm/s according to the spec sheet
-dt = 2  # Time step that we get to define  ###############################################################################
+# dt = 1  # Time step that we get to define  ###############################################################################
 
 ################################## Functions ###############################################
 # define function to convert user input into node format
@@ -31,13 +25,36 @@ def input2node(input):
         output.append(float(num))
     return output
 
-def move_step(u_l, u_r, theta):
-    dx1 = (R/2) * (u_l + u_r) * math.cos(theta) * dt
-    dy1 = (R/2) * (u_l + u_r) * math.sin(theta) * dt
-    dth1 = (R/L) * (u_r - u_l) * dt
-    dth1_deg = float(dth1 * 180 / pi)
+# def move_step(u_l, u_r, theta):
+#     dx1 = (R/2) * (u_l + u_r) * math.cos(theta) * dt
+#     dy1 = (R/2) * (u_l + u_r) * math.sin(theta) * dt
+#     dth1 = (R/L) * (u_r - u_l) * dt
+#     dth1_deg = float(dth1 * 180 / pi)
 
-    return dx1, dy1, dth1_deg
+#     return dx1, dy1, dth1_deg
+
+def cost(Xi,Yi,Thetai,UL,UR):
+    t = 0
+    r = 33
+    L = 160
+    dt = 0.1
+    Xn=Xi
+    Yn=Yi
+    Thetan = math.pi * Thetai / 180
+    # Xi, Yi,Thetai: Input point's coordinates
+    # Xs, Ys: Start point coordinates for plot function
+    # Xn, Yn, Thetan: End point coordintes
+    D=0
+    while t<1:
+        t = t + dt
+        # Xs = Xn
+        # Ys = Yn
+        Xn += 0.5*r * (UL + UR) * math.cos(Thetan) * dt
+        Yn += 0.5*r * (UL + UR) * math.sin(Thetan) * dt
+        Thetan += (r / L) * (UR - UL) * dt
+        D=D+ math.sqrt(math.pow((0.5*r * (UL + UR) * math.cos(Thetan) * dt),2)+math.pow((0.5*r * (UL + UR) * math.sin(Thetan) * dt),2))
+    Thetan = 180 * (Thetan) / math.pi
+    return Xn, Yn, Thetan, D
 
 # This reverses a list
 def reverse_list(listio):
@@ -79,17 +96,18 @@ for i in range(600):
     # print('i',i)
     for j in range(200):
         # print('j',j)
-        if j<=(1250 + r + c)/10 and (2500 - r - c)/10<=i<=(2650 + r + c)/10: #bottom rectangle definition w/ robot radius and clearance
+        if j<=(1250 + b + c)/10 and (2500 - b - c)/10<=i<=(2650 + b + c)/10: #bottom rectangle definition w/ robot radius and clearance
             obs[i,j]=1
-        elif j>=(750 - r - c)/10 and (1500 - r - c)/10<=i<=(1650 + r + c)/10: #top rectangle definition w/ robot radius and clearance
+        elif j>=(750 - b - c)/10 and (1500 - b - c)/10<=i<=(1650 + b + c)/10: #top rectangle definition w/ robot radius and clearance
             obs[i,j]=1
-        elif (i - 400)**2 + (j - 110)**2 <= ((500 + r + c)/10)**2: #circle definition w/ margin
+        elif (i - 400)**2 + (j - 110)**2 <= ((500 + b + c)/10)**2: #circle definition w/ margin
             obs[i,j]=1
-        elif i<=(r+c)/10 or i>=(6000 - r - c)/10:  #vertical wall definition
+        elif i<=(b+c)/10 or i>=(6000 - b - c)/10:  #vertical wall definition
             obs[i,j]=1
-        elif j<=(r+c)/10 or j>=(2000 - r - c)/10:  #horizontal wall definition
+        elif j<=(b+c)/10 or j>=(2000 - b - c)/10:  #horizontal wall definition
             obs[i,j]=1
 
+## how are you getting the acceptable ranges below? Should it be x is 0 to 600 and y is 0 to 250 like before?
 while 1:
     try:
         start_input = input("Start State (mm):")
@@ -133,13 +151,14 @@ open_l = PriorityQueue()
 closed_l = PriorityQueue()
 
 # Create the first element in the list
-cost_go1 = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
+cost_go = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
 # Determine number of points per frame and the weighting of the cost to go
-v_w = int(cost_go1/10)
+v_w = int(cost_go/10)
 c_w = 1 #(1 / 60) * (cost_go - 180)
+# 35 worked for the c_w for 50, 50 to 1500, 60
 
-# [Total cost, cost to go (not based on goal location), index, parent, [x, y, theta], distance traveled to reach the point]
-el1 = [cost_go1, 0, 0, 0, node_i, 0]
+# [Total cost, cost to come, index, parent, [x, y, theta], distance traveled to reach the point]
+el1 = [cost_go, 0, 0, 0, node_i, 0]
 open_l.put(el1) # starting the open list
 
 # Starting the search
@@ -147,14 +166,14 @@ id = el1[2]  # index of new nodes
 mat_exp_ol = np.zeros((607, 207))  # empty matrix to record where we have explored in the open list (we don't care about angle at the goal)
 mat_exp_cl = np.zeros((607, 207))  # empty matrix to record where we have explored in the closed list
 mat_cost = np.zeros((607, 207)) # saving the cost in a matrix
-node_path = [0, 0]  # creating this to test a bug
+# node_path = [0, 0]  # creating this to test a bug
 while not open_l.empty():
     # pull out a node and add it to the closed list
     x = open_l.get()
     closed_l.put(x)
     # pull out useful elements
     cur_cost = x[0]
-    cur_co = x[1]
+    cur_come = x[1]
     cur_ind = x[2]
     cur_par = x[3]
     cur_pos = x[4]
@@ -163,27 +182,31 @@ while not open_l.empty():
     # check if we have reached the goal
     thresh = np.sqrt((cur_pos[0] - node_g[0])**2 + (cur_pos[1] - node_g[1])**2)
     cur_time = time.time()
-    if (cur_time - start_time) > 60:
-        print("Aborting attempt")
-        thresh = 0
+    if (cur_time - start_time) > 300:
+        print("Aborting attempt. Execution time too long.")
+        break
     if thresh <= 50:
         # run the backtrack function
         node_path = trace_back(closed_l, cur_par, cur_ind)
         ## added to the print line below to verify that final state is correct
-        print("Success! Confirm final state:",'('+str(cur_pos[0])+', '+str(cur_pos[1])+', '+str(cur_pos[2])+')')
+        print("Success! Confirm final state with 50mm threshold:",'('+str(round(cur_pos[0]))+', '+str(round(cur_pos[1]))+', '+str(round(cur_pos[2]))+')')
         break
     
     else:
-        for i in range(0,8):
-            rpm = act[i, :]
-            # no slip condition
-            ul = float(rpm[0] * pi / 30)
-            ur = float(rpm[1] * pi / 30)
-            dx, dy, dth = move_step(ul, ur, float(cur_pos[2]*pi/180))
-            dist = float(np.sqrt(dx**2 + dy**2)) #changing variable name because we used L already to define lenth between wheels
-            print(dist)
-            new_pos = [cur_pos[0] + dx, cur_pos[1] + dy, cur_pos[2] + dth]
-
+        # for i in range(0,8):
+        #     rpm = act[i, :]
+        #     # no slip condition
+        #     ul = float(rpm[0] * pi / 30)
+        #     ur = float(rpm[1] * pi / 30)
+        #     dx, dy, dth = move_step(ul, ur, float(cur_pos[2]*pi/180))
+        #     dist = float(np.sqrt(dx**2 + dy**2))
+        #     new_pos = [cur_pos[0] + dx, cur_pos[1] + dy, cur_pos[2] + dth]
+        for action in act:
+            ul = float(action[0] * math.pi / 30)
+            ur = float(action[1] * math.pi / 30)
+            x_new, y_new, th_new, dist = cost(cur_pos[0], cur_pos[1], cur_pos[2], ul, ur)
+            new_pos = [x_new, y_new, th_new]
+            # print(new_pos)
             # keep theta value between 0 and 359
             if new_pos[2]>359:
                 new_pos[2] = new_pos[2]-360
@@ -195,13 +218,10 @@ while not open_l.empty():
             check_cl = mat_exp_cl[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100]
             check_ol = mat_exp_ol[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100]
             check_ob = obs[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100] #no theta value for obstacles
-#             cg = float(np.sqrt(dx**2 + dy**2)) #we already defined dist as this, no need to repeat
-            #cost_come = cur_cost - cur_go + dist #updated so this is current cost to come plus the new distance travelled, rather than based on cost to go
-            #print(cost_come)
-            cost_come = cur_co + dist
+            # cg = float(np.sqrt(dx**2 + dy**2))
+            cost_come = cur_come + dist
             cost_go = c_w * np.sqrt((node_g[0]-new_pos[0])**2 + (node_g[1]-new_pos[1])**2)  # weighted cost to go
             lxu = cost_come+cost_go  # combined cost
-            #print(lxu)
 
             if check_ob == 1: #decoupled the checks into separate statements
                 continue #we can skip all the updating code if the new node is in the obstacle space
@@ -210,7 +230,7 @@ while not open_l.empty():
                     mat_exp_ol[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100] = 1
                     id = id + 1
                     # lxu is cost to come plus cost to go
-                    new_node = [lxu, cost_come, id, cur_ind, new_pos, dist] #second item we should be tracking is cost to go
+                    new_node = [lxu, cost_come, id, cur_ind, new_pos, dist]
                     mat_cost[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100] = lxu  #update the cost matrix
                     open_l.put(new_node)
                 # Finding a repeat in the open loop
@@ -253,8 +273,8 @@ for i1_plot in range(0, plt1_size):
     dist = closed_l.queue[i1_plot][5]
     x_exp1.append(closed_l.queue[i1_plot][4][0])
     y_exp1.append(closed_l.queue[i1_plot][4][1])
-    xth_exp1.append(dist * math.cos(closed_l.queue[i1_plot][4][2] * pi / 180))
-    yth_exp1.append(dist * math.sin(closed_l.queue[i1_plot][4][2] * pi / 180))
+    xth_exp1.append(dist * math.cos(closed_l.queue[i1_plot][4][2] * math.pi / 180))
+    yth_exp1.append(dist * math.sin(closed_l.queue[i1_plot][4][2] * math.pi / 180))
 x_exp1 = reverse_list(x_exp1)
 y_exp1 = reverse_list(y_exp1)
 xth_exp1 = reverse_list(xth_exp1)
@@ -273,8 +293,8 @@ for i_pa in range(0, len_pa):
             dist = closed_l.queue[j_pa][5]
             x_pa.append(closed_l.queue[j_pa][4][0])
             y_pa.append(closed_l.queue[j_pa][4][1])
-            xth_pa.append(dist * math.cos(closed_l.queue[j_pa][4][2] * pi / 180))
-            yth_pa.append(dist * math.sin(closed_l.queue[j_pa][4][2] * pi / 180))
+            xth_pa.append(dist * math.cos(closed_l.queue[j_pa][4][2] * math.pi / 180))
+            yth_pa.append(dist * math.sin(closed_l.queue[j_pa][4][2] * math.pi / 180))
 
 #plotting the obstacle space
 fig, ax = plt.subplots(figsize=(12, 7))
@@ -285,8 +305,8 @@ plt.ylim((-1000, 1000))
 # plot all of the explored points in a test
 len_cl = len(x_exp1)
 len_pa = len(x_pa)
-print(len_cl)
-print(len_pa)
+# print(len_cl)
+# print(len_pa)
 def animate(fr):
     i_a = fr * v_w # range of points displayed in each frame
     if i_a < len_cl:

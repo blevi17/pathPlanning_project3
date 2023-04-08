@@ -1,7 +1,7 @@
 import numpy as np
 from queue import PriorityQueue
 import rospy
-from geometry_msgs.msg import Twist, Pose
+from geometry_msgs.msg import Twist
 import math
 import time
 
@@ -55,12 +55,17 @@ def cost(Xi,Yi,Thetai,UL,UR):
         # Ys = Yn
         Xn += 0.5*r * (UL + UR) * math.cos(Thetan) * dt
         Yn += 0.5*r * (UL + UR) * math.sin(Thetan) * dt
+        dx = Xn-Xi
+        dy = Yn-Yi
+        Xi=Xn
+        Yi=Yn
+        dxy = math.sqrt(dx**2 + dy**2)
         Thetan += (r / L) * (UR - UL) * dt
-        Dth=Dth+ (Thetan-Thetai)
+        th=Thetan-Thetai
         Thetai = Thetan
-        D=D+ math.sqrt(math.pow((0.5*r * (UL + UR) * math.cos(Thetan) * dt),2)+math.pow((0.5*r * (UL + UR) * math.sin(Thetan) * dt),2))
-        # Dth_list.append(Dth)
-        # D_list.append(D)
+        # D=D+ math.sqrt(math.pow((0.5*r * (UL + UR) * math.cos(Thetan) * dt),2)+math.pow((0.5*r * (UL + UR) * math.sin(Thetan) * dt),2))
+        D=D+ dxy
+        Dth=Dth+ th
     Thetan = 180 * (Thetan) / math.pi
     # Dth = 180 * (Dth) / pi
     return Xn, Yn, Thetan, D, Dth
@@ -82,9 +87,9 @@ def trace_back(q_cl, par, cur_ind):
                 path.append(q_cl.queue[it][3])
                 par = q_cl.queue[it][3]
     trace_res = reverse_list(path)
+    # trace_res = path
 
     return trace_res
-
 
 ################################### Main Code #############################################
 # Taking in user input
@@ -167,6 +172,8 @@ v_w = int(cost_go/10)
 c_w = 1 #(1 / 60) * (cost_go - 180)
 # 35 worked for the c_w for 50, 50 to 1500, 60
 
+# dxy_list = [0]
+# dth_list = [0]
 # [Total cost, cost to come, index, parent, [x, y, theta], distance traveled to reach the point, change in angle]
 el1 = [cost_go, 0, 0, 0, node_i, 0, 0]
 open_l.put(el1) # starting the open list
@@ -193,9 +200,9 @@ while not open_l.empty():
     # check if we have reached the goal
     thresh = np.sqrt((cur_pos[0] - node_g[0])**2 + (cur_pos[1] - node_g[1])**2)
     cur_time = time.time()
-    if (cur_time - start_time) > 240:
-        print("Aborting attempt")
-        thresh = 0
+    if (cur_time - start_time) > 300:
+        print("Aborting attempt. Execution time too long.")
+        break
     if thresh <= 50:
         # run the backtrack function
         node_path = trace_back(closed_l, cur_par, cur_ind)
@@ -217,6 +224,8 @@ while not open_l.empty():
             ur = float(action[1] * math.pi / 30)
             x_new, y_new, th_new, dist, dtheta = cost(cur_pos[0], cur_pos[1], cur_pos[2], ul, ur)
             new_pos = [x_new, y_new, th_new]
+            # print('dist', dist)
+            # print('dtheta', dtheta)
             # delta = [dist, dtheta]
             # print(new_pos)
             # keep theta value between 0 and 359
@@ -275,12 +284,27 @@ len_pa = len(node_path)
 vel = []
 angvel = []
 dt=1
+x_pa = []
+y_pa = []
+xth_pa = []
+yth_pa = []
 for i_pa in range(0, len_pa):
     ind_pa = node_path[i_pa]
     for j_pa in range(0, plt1_size):
         if closed_l.queue[j_pa][2] == ind_pa:
+            dist = closed_l.queue[j_pa][5]
+            # x_pa.append(closed_l.queue[j_pa][4][0])
+            # y_pa.append(closed_l.queue[j_pa][4][1])
+            # xth_pa.append(dist * math.cos(closed_l.queue[j_pa][4][2] * math.pi / 180))
+            # yth_pa.append(dist * math.sin(closed_l.queue[j_pa][4][2] * math.pi / 180))
             # for n in range(10):
-            vel.append(closed_l.queue[j_pa][5]/(1000*dt))
+            theta = closed_l.queue[j_pa][4][2]*(math.pi/180)
+            if theta==0:
+                arclen = dist
+            else:
+                arclen = (theta*dist)/abs(2*math.sin(theta/2))
+            vel.append(arclen/(1000*dt))
+            # vel.append(dist/(1000*dt))
             angvel.append(closed_l.queue[j_pa][6]/dt)
             # for v in closed_l.queue[j_pa][5]:
             #     vel.append(v/(1000*dt))
@@ -290,6 +314,13 @@ for i_pa in range(0, len_pa):
             # y_v.append(closed_l.queue[j_pa][6][1] / (1000 * dt))
             # th_v.append(closed_l.queue[j_pa][6][2] * pi / (180 * dt))
             
+            
+# print("vel",vel)
+# print("angs",angvel)       
+
+# vel = reverse_list(vel)
+# angvel = reverse_list(angvel)
+
 ## used to time how long code takes to execute
 end_time = time.time()
 print('Total time (s):', end_time-start_time)
@@ -302,7 +333,7 @@ def astar_path():
     # rate = rospy.Rate(1/dt)
     vel_cmd = 0
     ang_cmd = 0
-    for i in range(len(vel)):
+    for i in range(len_pa):
         if not rospy.is_shutdown():
         # if not rospy.is_shutdown():
             vel_cmd = vel[i]
@@ -312,6 +343,7 @@ def astar_path():
             #buffer is based on the dt value
             pub.publish(msg)
             rospy.sleep(dt)
+            # rate.sleep()
 
     msg.linear.x = 0.0
     msg.angular.z = 0.0

@@ -9,13 +9,11 @@ import time
 start_time = time.time()
 
 # Variables from the datasheet of the turtlebot
-# R = 33  # wheel radius in mm
 b = 105 # necessary buffer around the robot in mm
-# L = 160  # wheel center to center distance in mm
 v_mr = 2.84  # maximum rotational velocity in rad/s
 v_mrev = float(v_mr * 60 / (2 * math.pi))  # maximum rotational velocity in revolutions/minute
 v_mt = 220  # maximum translational velocity in mm/s according to the spec sheet
-# dt = 1  # Time step that we get to define  ###############################################################################
+###############################################################################
 
 ################################## Functions ###############################################
 # define function to convert user input into node format
@@ -24,14 +22,6 @@ def input2node(input):
     for num in input.split(', '):
         output.append(float(num))
     return output
-
-# def move_step(u_l, u_r, theta):
-#     dx1 = (R/2) * (u_l + u_r) * math.cos(theta) * dt
-#     dy1 = (R/2) * (u_l + u_r) * math.sin(theta) * dt
-#     dth1 = (R/L) * (u_r - u_l) * dt
-#     dth1_deg = float(dth1 * 180 / pi)
-
-#     return dx1, dy1, dth1_deg
 
 def cost(Xi,Yi,Thetai,UL,UR):
     t = 0
@@ -47,8 +37,6 @@ def cost(Xi,Yi,Thetai,UL,UR):
     # Xn, Yn, Thetan: End point coordintes
     D=0
     Dth=0
-    # Dth_list = []
-    # D_list = []
     while t<1:
         t = t + dt
         # Xs = Xn
@@ -63,11 +51,9 @@ def cost(Xi,Yi,Thetai,UL,UR):
         Thetan += (r / L) * (UR - UL) * dt
         th=Thetan-Thetai
         Thetai = Thetan
-        # D=D+ math.sqrt(math.pow((0.5*r * (UL + UR) * math.cos(Thetan) * dt),2)+math.pow((0.5*r * (UL + UR) * math.sin(Thetan) * dt),2))
         D=D+ dxy
         Dth=Dth+ th
     Thetan = 180 * (Thetan) / math.pi
-    # Dth = 180 * (Dth) / pi
     return Xn, Yn, Thetan, D, Dth
 
 # This reverses a list
@@ -87,7 +73,6 @@ def trace_back(q_cl, par, cur_ind):
                 path.append(q_cl.queue[it][3])
                 par = q_cl.queue[it][3]
     trace_res = reverse_list(path)
-    # trace_res = path
 
     return trace_res
 
@@ -104,9 +89,7 @@ while 1:
         print('Input must be a number between 0 and 190. Try again...')
 
 # Check the obstacle space
-# I want to make the bottom left corner the obstacle space of the matrix we are checking
-## For part 1 we are supposed to use the same map as we did in phase 1 (see 2nd bullet on slide 15 of instructions) not the Gazebo map provided for part 2
-obs = np.zeros((600, 200))  # might have to change this depending on step sizes
+obs = np.zeros((600, 200))  
 for i in range(600):
     # print('i',i)
     for j in range(200):
@@ -122,7 +105,6 @@ for i in range(600):
         elif j<=(b+c)/10 or j>=(2000 - b - c)/10:  #horizontal wall definition
             obs[i,j]=1
 
-## how are you getting the acceptable ranges below? Should it be x is 0 to 600 and y is 0 to 250 like before?
 while 1:
     try:
         start_input = input("Start State (mm):")
@@ -167,13 +149,10 @@ closed_l = PriorityQueue()
 
 # Create the first element in the list
 cost_go = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
-# Determine number of points per frame and the weighting of the cost to go
+# Determine number of points per frame
 v_w = int(cost_go/10)
 c_w = 1 #(1 / 60) * (cost_go - 180)
-# 35 worked for the c_w for 50, 50 to 1500, 60
 
-# dxy_list = [0]
-# dth_list = [0]
 # [Total cost, cost to come, index, parent, [x, y, theta], distance traveled to reach the point, change in angle]
 el1 = [cost_go, 0, 0, 0, node_i, 0, 0]
 open_l.put(el1) # starting the open list
@@ -211,23 +190,11 @@ while not open_l.empty():
         break
     
     else:
-        # for i in range(0,8):
-        #     rpm = act[i, :]
-        #     # no slip condition
-        #     ul = float(rpm[0] * pi / 30)
-        #     ur = float(rpm[1] * pi / 30)
-        #     dx, dy, dth = move_step(ul, ur, float(cur_pos[2]*pi/180))
-        #     dist = float(np.sqrt(dx**2 + dy**2))
-        #     new_pos = [cur_pos[0] + dx, cur_pos[1] + dy, cur_pos[2] + dth]
         for action in act:
             ul = float(action[0] * math.pi / 30)
             ur = float(action[1] * math.pi / 30)
             x_new, y_new, th_new, dist, dtheta = cost(cur_pos[0], cur_pos[1], cur_pos[2], ul, ur)
             new_pos = [x_new, y_new, th_new]
-            # print('dist', dist)
-            # print('dtheta', dtheta)
-            # delta = [dist, dtheta]
-            # print(new_pos)
             # keep theta value between 0 and 359
             if new_pos[2]>359:
                 new_pos[2] = new_pos[2]-360
@@ -244,8 +211,8 @@ while not open_l.empty():
             cost_go = c_w * np.sqrt((node_g[0]-new_pos[0])**2 + (node_g[1]-new_pos[1])**2)  # weighted cost to go
             lxu = cost_come+cost_go  # combined cost
 
-            if check_ob == 1: #decoupled the checks into separate statements
-                continue #we can skip all the updating code if the new node is in the obstacle space
+            if check_ob == 1: 
+                continue 
             elif check_cl == 0:
                 if check_ol == 0:
                     mat_exp_ol[round(new_pos[0]/10)+50][round(new_pos[1]/10)+100] = 1
@@ -284,42 +251,18 @@ len_pa = len(node_path)
 vel = []
 angvel = []
 dt=1
-x_pa = []
-y_pa = []
-xth_pa = []
-yth_pa = []
 for i_pa in range(0, len_pa):
     ind_pa = node_path[i_pa]
     for j_pa in range(0, plt1_size):
         if closed_l.queue[j_pa][2] == ind_pa:
             dist = closed_l.queue[j_pa][5]
-            # x_pa.append(closed_l.queue[j_pa][4][0])
-            # y_pa.append(closed_l.queue[j_pa][4][1])
-            # xth_pa.append(dist * math.cos(closed_l.queue[j_pa][4][2] * math.pi / 180))
-            # yth_pa.append(dist * math.sin(closed_l.queue[j_pa][4][2] * math.pi / 180))
-            # for n in range(10):
             theta = closed_l.queue[j_pa][4][2]*(math.pi/180)
             if theta==0:
                 arclen = dist
             else:
                 arclen = (theta*dist)/abs(2*math.sin(theta/2))
             vel.append(arclen/(1000*dt))
-            # vel.append(dist/(1000*dt))
             angvel.append(closed_l.queue[j_pa][6]/dt)
-            # for v in closed_l.queue[j_pa][5]:
-            #     vel.append(v/(1000*dt))
-            # for a in closed_l.queue[j_pa][6]:
-            #     angvel.append(a/dt)
-            # x_v.append(closed_l.queue[j_pa][6][0] / (1000 * dt))
-            # y_v.append(closed_l.queue[j_pa][6][1] / (1000 * dt))
-            # th_v.append(closed_l.queue[j_pa][6][2] * pi / (180 * dt))
-            
-            
-# print("vel",vel)
-# print("angs",angvel)       
-
-# vel = reverse_list(vel)
-# angvel = reverse_list(angvel)
 
 ## used to time how long code takes to execute
 end_time = time.time()
@@ -335,7 +278,6 @@ def astar_path():
     ang_cmd = 0
     for i in range(len_pa):
         if not rospy.is_shutdown():
-        # if not rospy.is_shutdown():
             vel_cmd = vel[i]
             ang_cmd = angvel[i]
             msg.linear.x = float(vel_cmd)
@@ -343,7 +285,6 @@ def astar_path():
             #buffer is based on the dt value
             pub.publish(msg)
             rospy.sleep(dt)
-            # rate.sleep()
 
     msg.linear.x = 0.0
     msg.angular.z = 0.0

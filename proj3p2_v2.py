@@ -153,7 +153,7 @@ closed_l = PriorityQueue()
 # Create the first element in the list
 cost_go = np.sqrt((node_g[0]-node_i[0])**2 + (node_g[1]-node_i[1])**2)
 # Determine number of points per frame and the weighting of the cost to go
-v_w = int(cost_go/10)
+v_w = int(cost_go)
 c_w = 1 #(1 / 60) * (cost_go - 180)
 # 35 worked for the c_w for 50, 50 to 1500, 60
 
